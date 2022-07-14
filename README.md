@@ -1,4 +1,4 @@
-# tekton-gcp-setup
+# Tekton on GCP
 Script setup of Tekton on GCP, from standup through end-to-end build-and-push of container to AR.
 
 1. Set up a GCP project, including billing setup.
