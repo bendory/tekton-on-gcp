@@ -64,9 +64,10 @@ gcloud container clusters get-credentials "${CLUSTER}" # Set up kubectl credenti
 kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account="${SA}"
 
 # Install Tekton
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml --wait=true
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 tkn hub install task git-clone
 tkn hub install task kaniko
+echo "Sleeping 60 seconds to ensure Tekton Pipelines installation is complete..."
 sleep 60 # TODO: How do I know when pipeline CRD is ready for use?
 kubectl apply --filename pipeline.yaml
 
