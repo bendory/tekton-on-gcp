@@ -69,9 +69,10 @@ tkn hub install task git-clone
 tkn hub install task kaniko
 
 # Wait for pipelines to be ready.
+unset status
 while [[ "${status}" -ne "Running" ]]; do
   echo "Waiting for Tekton Pipelines installation to complete."
-  status=$(kubectl get pods --namespace tekton-pipelines -o custom-columns='Running:status.phase' | sort -u)
+  status=$(kubectl get pods --namespace tekton-pipelines -o custom-columns=':status.phase' | sort -u)
 done
 echo "Tekton Pipelines installation completed."
 
