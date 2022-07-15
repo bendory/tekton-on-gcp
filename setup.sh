@@ -69,9 +69,9 @@ tkn hub install task git-clone
 tkn hub install task kaniko
 echo "Sleeping 60 seconds to ensure Tekton Pipelines installation is complete..."
 sleep 60 # TODO: How do I know when pipeline CRD is ready for use?
-kubectl apply --filename pipeline.yaml
 
-# Set up and apply pipelinerun.yaml, which is missing the target image name.
+# Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
+kubectl apply --filename pipeline.yaml
 echo "    value: us-docker.pkg.dev/${PROJECT}/${REPO}/mini-true" >> pipelinerun.yaml
 kubectl apply --filename pipelinerun.yaml
 
