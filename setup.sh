@@ -67,8 +67,13 @@ kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-servi
 kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 tkn hub install task git-clone
 tkn hub install task kaniko
-echo "Sleeping 60 seconds to ensure Tekton Pipelines installation is complete..."
-sleep 60 # TODO: How do I know when pipeline CRD is ready for use?
+
+# Wait for ipelines to be ready.
+while [[ "${status}" -ne "Running" ]]; do
+  echo "Waiting for Tekton Pipelines installation to complete."
+  status=$(kubectl get pods --namespace tekton-pipelines -o custom-columns='Running:status.phase' | sort -u)
+done
+echo "Tekton Pipelines installation completed."
 
 # Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
 kubectl apply --filename pipeline.yaml
