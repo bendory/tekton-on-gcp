@@ -6,3 +6,12 @@ Script setup of Tekton on GCP, from standup through end-to-end build-and-push of
 3. Clone this repo.
 4. `export PROJECT=<the-project-you-set-up>`
 5. `./setup.sh`
+
+## Example
+
+```
+export PROJECT=my-project-name
+gcloud projects create ${PROJECT}
+gcloud beta billing projects link ${PROJECT} --billing-account=${BILLING_ACCOUNT}
+./setup.sh
+```
