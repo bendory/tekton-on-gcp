@@ -1,24 +1,31 @@
 #!/bin/sh
 set -e
 
+# Pre-requisites: installation of Cloud SDK, kubectl, tkn
 # Pre-requisite: PROJECT is defined
 # Pre-requisite: ${PROJECT} exists in GCP with billing enabled.
 if [[ -z "${PROJECT}" ]]; then
-	echo "Set envvar PROJECT to your GCP project before running this script."
-	exit 1
+  echo "Set envvar PROJECT to your GCP project before running this script."
+  exit 1
 fi;
 
-# Pre-requisite: installation of Cloud SDK, kubectl, tkn
+# Pre-requisite: authentication for Cloud SDK
+ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+if [[ -z "${ACCOUNT}" ]]; then
+  echo "Run 'gcloud auth login' to authenticate on GCP before running this script."
+  exit 1
+fi;
+
 export CLUSTER=tekton-showcase
-export NODE_POOL=default-pool # I took this from my existing cluster, is it correct?
+export NODE_POOL=default-pool
 export REGION=us-central1
 export REPO=tekton
 export LOCATION=us
 export BUILDER=builder
 export SA="${BUILDER}@${PROJECT}.iam.gserviceaccount.com"
 
-gcloud config configurations create "showcase-friction"
-gcloud config set core/account "${USER}@google.com"
+gcloud config configurations create "tekton-setup"
+gcloud config set core/account "${ACCOUNT}"
 gcloud config set core/project "${PROJECT}"
 
 # Start API enablements so we don't have to wait for them below.
