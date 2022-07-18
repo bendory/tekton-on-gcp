@@ -14,9 +14,21 @@ NOTE: When you run `setup.sh`:
 
 ## Example
 
-```
+```shell
 export PROJECT=my-project-name
 gcloud projects create ${PROJECT}
 gcloud beta billing projects link ${PROJECT} --billing-account=${BILLING_ACCOUNT}
 ./setup.sh
+```
+
+## Some helper commands
+
+Extract provenance details about the built image:
+
+```shell
+export IMAGE_URL=$(tkn tr describe --last -o jsonpath="{.status.taskResults[1].value}")
+export IMAGE_DIGEST=$(tkn tr describe --last -o jsonpath="{.status.taskResults[0].value}")
+
+alias gcurl='curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $(gcloud auth print-access-token)"'
+gcurl https://containeranalysis.googleapis.com/v1/projects/$PROJECT/occurrences\?filter\="resourceUrl=\"$IMAGE_URL@$IMAGE_DIGEST\"%20AND%20kind=\"BUILD\""
 ```
