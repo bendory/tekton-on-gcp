@@ -34,12 +34,12 @@ gcloud config set core/account "${ACCOUNT}"
 gcloud config set core/project "${PROJECT}"
 
 # Start API enablements so we don't have to wait for them below.
-gcloud services enable compute.googleapis.com --async           # GCE
 gcloud services enable artifactregistry.googleapis.com --async  # AR
-gcloud services enable container.googleapis.com --async         # GKE
-gcloud services enable iam.googleapis.com --async               # IAM
 gcloud services enable cloudkms.googleapis.com --async          # KMS
+gcloud services enable compute.googleapis.com --async           # GCE
+gcloud services enable container.googleapis.com --async         # GKE
 gcloud services enable containeranalysis.googleapis.com --async # Container Analysis
+gcloud services enable iam.googleapis.com --async               # IAM
 
 # Can't set properties until APIs are enabled!
 gcloud services enable compute.googleapis.com # Ensure GCE is enabled
