@@ -153,7 +153,7 @@ gcloud projects add-iam-policy-binding "${PROJECT}" \
 # Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
 kubectl apply --filename pipeline.yaml
 echo "    value: us-docker.pkg.dev/${PROJECT}/${REPO}/mini-true" >> pipelinerun.yaml
-kubectl apply --filename pipelinerun.yaml
+kubectl create --filename pipelinerun.yaml
 
 # Wait for completion!
 tkn pr logs -f
