@@ -4,7 +4,7 @@
 # - install `cosign` and `jq`.
 # - set up Application Default Credentials by running `gcloud auth application-default login`.
 # - $PROJECT is set.
-#set -e
+set -e
 
 if [[ -z "${PROJECT}" ]]; then
   echo "Set envvar PROJECT to your GCP project before running this script."
