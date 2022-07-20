@@ -28,11 +28,11 @@ KEY_REF=$(cat "${full}" | jq -r '.occurrences[0].envelope.signatures[0].keyid')
 signature=${TMP}/signature
 cat "${full}" | jq -r '.occurrences[0].envelope.signatures[0].sig' | tr '\-_' '+/' | base64 -d > ${signature}
 
-# Verify the signature.
-cosign verify-blob --key "${KEY_REF}" --signature "${signature}" "${signature}"
-
 # NOTE: if you want to see the provenance, you can extract it here:
 #provenance=${TMP}/provenance
 #cat "${full}" | jq -r '.occurrences[0].envelope.payload' | tr '\-_' '+/' | base64 -d > ${provenance}
+
+# Verify the signature.
+cosign verify-blob --key "${KEY_REF}" --signature "${signature}" "${signature}"
 
 rm -rf "${TMP}"
