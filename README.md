@@ -7,10 +7,8 @@ Script setup of Tekton on GCP, from standup through end-to-end build-and-push of
 4. `export PROJECT=<the-project-you-set-up>`
 5. `./setup.sh`
 
-NOTE: When you run `setup.sh`:
-- A new `gcloud` configuration named "tekton-setup" will be created and populated.
-- A new `kubectl` configuration will be created.
-- Both of these configurations will be active when `setup.sh` completes.
+NOTE: When you run `setup.sh`,a new `kubectl` configuration will be created and
+will be active when `setup.sh` completes.
 
 ## Example
 
