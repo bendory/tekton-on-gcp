@@ -41,4 +41,5 @@ NOTE:
   you can put into place like this: `gcloud auth application-default login`.
   This is different from `gcloud auth login`, and you only need to do it once.
 
-Run `verify_provenance.sh` to verify the signature with `kms`.
+Run `verify_provenance.sh` to verify the signed provenance with `kms`.
+Run `verify_attestation.sh` to verify the signed attestation with `kms`.
