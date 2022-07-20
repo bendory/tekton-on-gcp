@@ -29,44 +29,43 @@ export VERIFIER_SA="${VERIFIER}@${PROJECT}.iam.gserviceaccount.com"
 export KEY=tekton-signing-key
 export KEYRING=tekton-keyring
 
-gcloud config configurations create "tekton-setup"
-gcloud config set core/account "${ACCOUNT}"
-gcloud config set core/project "${PROJECT}"
-
 # Start API enablements so we don't have to wait for them below.
-gcloud services enable artifactregistry.googleapis.com --async  # AR
-gcloud services enable cloudkms.googleapis.com --async          # KMS
-gcloud services enable compute.googleapis.com --async           # GCE
-gcloud services enable container.googleapis.com --async         # GKE
-gcloud services enable containeranalysis.googleapis.com --async # Container Analysis
-gcloud services enable iam.googleapis.com --async               # IAM
+gcloud --project=${PROJECT} services enable artifactregistry.googleapis.com --async  # AR
+gcloud --project=${PROJECT} services enable cloudkms.googleapis.com --async          # KMS
+gcloud --project=${PROJECT} services enable compute.googleapis.com --async           # GCE
+gcloud --project=${PROJECT} services enable container.googleapis.com --async         # GKE
+gcloud --project=${PROJECT} services enable containeranalysis.googleapis.com --async # Container Analysis
+gcloud --project=${PROJECT} services enable iam.googleapis.com --async               # IAM
 
 # Can't set properties until APIs are enabled!
-gcloud services enable compute.googleapis.com # Ensure GCE is enabled
-gcloud config set compute/region "${REGION}"
+gcloud --project=${PROJECT} services enable compute.googleapis.com # Ensure GCE is enabled
 
 # Let all Googlers view this project
-gcloud services enable iam.googleapis.com # Ensure IAM is enabled
+gcloud --project=${PROJECT} services enable iam.googleapis.com # Ensure IAM is enabled
 gcloud projects add-iam-policy-binding "${PROJECT}" --member='domain:google.com' --role='roles/viewer'
 
 # Create the BUILDER_SA
-gcloud iam service-accounts create "${BUILDER}"
+gcloud --project=${PROJECT} iam service-accounts create "${BUILDER}" \
+    --description="Tekton Build-time Service Account" \
+    --display-name="Tekton Builder"
 
 # Set up AR
-gcloud services enable artifactregistry.googleapis.com # Ensure AR is enabled
-gcloud artifacts repositories create "${REPO}" --repository-format=docker --location="${LOCATION}"
+gcloud --project=${PROJECT} services enable artifactregistry.googleapis.com # Ensure AR is enabled
+gcloud --project=${PROJECT} artifacts repositories create "${REPO}" \
+    --repository-format=docker --location="${LOCATION}"
 gcloud projects add-iam-policy-binding "${PROJECT}" \
     --member="serviceAccount:${BUILDER_SA}" --role='roles/artifactregistry.writer'
 
 # Set up GKE with Workload Identity
 # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
-gcloud services enable container.googleapis.com # Ensure GKE is enabled
-gcloud config set container/cluster "${CLUSTER}"
-gcloud container clusters create "${CLUSTER}" --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog"
-gcloud container node-pools update "${NODE_POOL}" --cluster="${CLUSTER}" --workload-metadata=GKE_METADATA
-gcloud container clusters get-credentials "${CLUSTER}" # Set up kubectl credentials
-gcloud iam service-accounts add-iam-policy-binding "${BUILDER_SA}" \
-    --role roles/iam.workloadIdentityUser \
+gcloud --project=${PROJECT} services enable container.googleapis.com # Ensure GKE is enabled
+gcloud --project=${PROJECT} container clusters create "${CLUSTER}" \
+    --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog"
+gcloud --project=${PROJECT} container node-pools update "${NODE_POOL}" \
+    --cluster="${CLUSTER}" --workload-metadata=GKE_METADATA
+gcloud --project=${PROJECT} container clusters get-credentials "${CLUSTER}" # Set up kubectl credentials
+gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
+    "${BUILDER_SA}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT}.svc.id.goog[default/default]"
 
 kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account="${BUILDER_SA}"
@@ -100,7 +99,7 @@ TMP=$(mktemp -d)
 cd ${TMP}
 git clone --depth=1 https://github.com/tektoncd/chains.git
 cd chains
-export KO_DOCKER_REPO=us-docker.pkg.dev/${PROJECT}/${REPO}
+export KO_DOCKER_REPO=${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}
 ko apply -f config/
 cd ${HERE}
 rm -rf ${TMP}
@@ -114,16 +113,18 @@ done
 echo "Tekton Chains installation completed."
 
 # Configure Chains
-gcloud iam service-accounts create "${VERIFIER}"
-gcloud iam service-accounts add-iam-policy-binding "${VERIFIER_SA}" \
-    --role roles/iam.workloadIdentityUser \
+gcloud --project=${PROJECT} iam service-accounts create "${VERIFIER}" \
+    --description="Tekton Chains Service Account" \
+    --display-name="Tekton Chains"
+gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
+    "${VERIFIER_SA}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT}.svc.id.goog[${CHAINS_NS}/default]"
 kubectl annotate serviceaccount --namespace "${CHAINS_NS}" default iam.gke.io/gcp-service-account="${VERIFIER_SA}"
 
 # Configure KMS
-gcloud services enable cloudkms.googleapis.com # Ensure KMS is available.
-gcloud kms keyrings create "${KEYRING}" --location "${LOCATION}"
-gcloud kms keys create "${KEY}" \
+gcloud --project=${PROJECT} services enable cloudkms.googleapis.com # Ensure KMS is available.
+gcloud --project=${PROJECT} kms keyrings create "${KEYRING}" --location "${LOCATION}"
+gcloud --project=${PROJECT} kms keys create "${KEY}" \
     --keyring "${KEYRING}" \
     --location "${LOCATION}" \
     --purpose "asymmetric-signing" \
@@ -133,10 +134,10 @@ gcloud projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
 gcloud projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
-gcloud kms keys add-iam-policy-binding "${KEY}" \
+gcloud --project=${PROJECT} kms keys add-iam-policy-binding "${KEY}" \
     --keyring="${KEYRING}" --location="${LOCATION}" \
     --member="serviceAccount:${VERIFIER_SA}" --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
-gcloud kms keys add-iam-policy-binding "${KEY}" \
+gcloud --project=${PROJECT} kms keys add-iam-policy-binding "${KEY}" \
     --keyring="${KEYRING}" --location="${LOCATION}" \
     --member="domain:google.com" --role="roles/cloudkms.verifier"
 
@@ -154,15 +155,15 @@ kubectl patch configmap chains-config -n tekton-chains -p="{\"data\": {\"signers
 kubectl patch configmap chains-config -n tekton-chains -p="{\"data\": {\"storage.grafeas.projectid\": \"${PROJECT}\"}}"
 
 # Grant tekton-chains-controller access to VERIFIER_SA
-gcloud iam service-accounts add-iam-policy-binding $VERIFIER_SA \
-    --role roles/iam.workloadIdentityUser \
+gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
+    $VERIFIER_SA --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/tekton-chains-controller]"
 kubectl annotate serviceaccount tekton-chains-controller \
     --namespace "${CHAINS_NS}" \
     iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
 # Configure Container Analysis
-gcloud services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
+gcloud --project=${PROJECT} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
 gcloud projects add-iam-policy-binding "${PROJECT}" \
     --role roles/containeranalysis.notes.editor \
     --member "serviceAccount:${VERIFIER_SA}"
