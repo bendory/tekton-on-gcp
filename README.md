@@ -32,3 +32,13 @@ export IMAGE_DIGEST=$(tkn tr describe --last -o jsonpath="{.status.taskResults[0
 alias gcurl='curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $(gcloud auth print-access-token)"'
 gcurl https://containeranalysis.googleapis.com/v1/projects/$PROJECT/occurrences\?filter\="resourceUrl=\"$IMAGE_URL@$IMAGE_DIGEST\"%20AND%20kind=\"BUILD\""
 ```
+
+## Verify signatures
+
+NOTE:
+- To verify signatures, install `cosign` and `jq`.
+- To authenticate with `cosign`, you need Application Default Credentials, which
+  you can put into place like this: `gcloud auth application-default login`.
+  This is different from `gcloud auth login`, and you only need to do it once.
+
+Run `verify_provenance.sh` to verify the signature with `kms`.
