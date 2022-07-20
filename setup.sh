@@ -130,7 +130,6 @@ gcloud --project=${PROJECT} kms keys create "${KEY}" \
     --location "${LOCATION}" \
     --purpose "asymmetric-signing" \
     --default-algorithm "rsa-sign-pkcs1-2048-sha256"
-# TODO: narrow this, restrict to just the needed key.
 gcloud projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
 gcloud projects add-iam-policy-binding "${PROJECT}" \
