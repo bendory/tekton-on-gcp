@@ -6,9 +6,13 @@ Script setup of Tekton on GCP, from standup through end-to-end build-and-push of
 3. Clone this repo.
 4. `export PROJECT=<the-project-you-set-up>`
 5. `./setup.sh`
+6. When `setup.sh` completes, `run_pipeline.sh` will build and push a container.
+7. Provenance will be captured in Container Analysis, and the `./verify_*`
+   scripts can be used to verify `kms` signatures.
 
 NOTE: When you run `setup.sh`,a new `kubectl` configuration will be created and
-will be active when `setup.sh` completes.
+will be active when `setup.sh` completes. The other scripts assume that
+configuration is the active configuration.
 
 ## Example
 
@@ -17,18 +21,7 @@ export PROJECT=my-project-name
 gcloud projects create ${PROJECT}
 gcloud beta billing projects link ${PROJECT} --billing-account=${BILLING_ACCOUNT}
 ./setup.sh
-```
-
-## Some helper commands
-
-Extract provenance details about the built image:
-
-```shell
-export IMAGE_URL=$(tkn tr describe --last -o jsonpath="{.status.taskResults[1].value}")
-export IMAGE_DIGEST=$(tkn tr describe --last -o jsonpath="{.status.taskResults[0].value}")
-
-alias gcurl='curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $(gcloud auth print-access-token)"'
-gcurl https://containeranalysis.googleapis.com/v1/projects/$PROJECT/occurrences\?filter\="resourceUrl=\"$IMAGE_URL@$IMAGE_DIGEST\"%20AND%20kind=\"BUILD\""
+./run_pipeline.sh
 ```
 
 ## Verify signatures
