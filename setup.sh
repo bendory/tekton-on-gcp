@@ -113,14 +113,16 @@ while [[ "${status}" -ne "Running" ]]; do
 done
 echo "Tekton Chains installation completed."
 
-# Configure Chains
+# Configure Chains KSA / GSA
 gcloud --project=${PROJECT} iam service-accounts create "${VERIFIER}" \
     --description="Tekton Chains Service Account" \
     --display-name="Tekton Chains"
 gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
-    "${VERIFIER_SA}" --role roles/iam.workloadIdentityUser \
-    --member "serviceAccount:${PROJECT}.svc.id.goog[${CHAINS_NS}/default]"
-kubectl annotate serviceaccount --namespace "${CHAINS_NS}" default iam.gke.io/gcp-service-account="${VERIFIER_SA}"
+    $VERIFIER_SA --role roles/iam.workloadIdentityUser \
+    --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/tekton-chains-controller]"
+kubectl annotate serviceaccount tekton-chains-controller \
+    --namespace "${CHAINS_NS}" \
+    iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
 # Configure KMS
 gcloud --project=${PROJECT} services enable cloudkms.googleapis.com # Ensure KMS is available.
@@ -153,14 +155,6 @@ kubectl patch configmap chains-config -n tekton-chains -p='{"data":{
 export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
 kubectl patch configmap chains-config -n tekton-chains -p="{\"data\": {\"signers.kms.kmsref\": \"${KMS_REF}\"}}"
 kubectl patch configmap chains-config -n tekton-chains -p="{\"data\": {\"storage.grafeas.projectid\": \"${PROJECT}\"}}"
-
-# Grant tekton-chains-controller access to VERIFIER_SA
-gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
-    $VERIFIER_SA --role roles/iam.workloadIdentityUser \
-    --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/tekton-chains-controller]"
-kubectl annotate serviceaccount tekton-chains-controller \
-    --namespace "${CHAINS_NS}" \
-    iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
 # Configure Container Analysis
 gcloud --project=${PROJECT} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
