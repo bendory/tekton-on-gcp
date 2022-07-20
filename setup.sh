@@ -62,8 +62,9 @@ gcloud --project=${PROJECT} services enable container.googleapis.com # Ensure GK
 gcloud --project=${PROJECT} container clusters create "${CLUSTER}" \
     --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog"
 gcloud --project=${PROJECT} container node-pools update "${NODE_POOL}" \
-    --cluster="${CLUSTER}" --workload-metadata=GKE_METADATA
-gcloud --project=${PROJECT} container clusters get-credentials "${CLUSTER}" # Set up kubectl credentials
+    --region=${REGION} --cluster="${CLUSTER}" --workload-metadata=GKE_METADATA
+gcloud --project=${PROJECT} container clusters \
+    get-credentials --region=${REGION} "${CLUSTER}" # Set up kubectl credentials
 gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
     "${BUILDER_SA}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT}.svc.id.goog[default/default]"
