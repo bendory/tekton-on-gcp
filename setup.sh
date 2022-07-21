@@ -24,7 +24,7 @@ export LOCATION=us
 export BUILDER=builder
 export BUILDER_SA="${BUILDER}@${PROJECT}.iam.gserviceaccount.com"
 export CHAINS_NS=tekton-chains
-export VERIFIER=tekton-chains
+export VERIFIER=tekton-chains-controller
 export VERIFIER_SA="${VERIFIER}@${PROJECT}.iam.gserviceaccount.com"
 export KEY=tekton-signing-key
 export KEYRING=tekton-keyring
@@ -119,9 +119,8 @@ gcloud --project=${PROJECT} iam service-accounts create "${VERIFIER}" \
     --display-name="Tekton Chains"
 gcloud --project=${PROJECT} iam service-accounts add-iam-policy-binding \
     $VERIFIER_SA --role roles/iam.workloadIdentityUser \
-    --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/tekton-chains-controller]"
-kubectl annotate serviceaccount tekton-chains-controller \
-    --namespace "${CHAINS_NS}" \
+    --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/${VERIFIER}]"
+kubectl annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
     iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
 # Configure KMS
