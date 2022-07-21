@@ -22,14 +22,14 @@ full=${TMP}/full
 gcurl "${query_url}" > ${full}
 
 # This is the signing key.
-KEY_REF=$(cat "${full}" | jq -r '.occurrences[0].envelope.signatures[0].keyid')
+KEY_REF=$(jq -r '.occurrences[0].envelope.signatures[0].keyid' "${full}")
 
 # Extract the signature.
 signature=${TMP}/signature
-cat "${full}" | jq -r '.occurrences[0].envelope.signatures[0].sig' | tr '\-_' '+/' | base64 -d > ${signature}
+jq -r '.occurrences[0].envelope.signatures[0].sig' "${full}" | tr '\-_' '+/' | base64 -d > ${signature}
 
 attestation=${TMP}/attestation
-cat "${full}" | jq -r '.occurrences[0].envelope.payload' | tr '\-_' '+/' | base64 -d > ${attestation}
+jq -r '.occurrences[0].envelope.payload' "${full}" | tr '\-_' '+/' | base64 -d > ${attestation}
 
 # Verify the signature.
 cosign verify-blob --key "${KEY_REF}" --signature "${signature}" "${attestation}"
