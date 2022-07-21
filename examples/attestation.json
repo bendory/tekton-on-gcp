@@ -1,0 +1,31 @@
+{
+  "occurrences": [
+    {
+      "name": "projects/bendory-20220720-f/occurrences/c73b99dc-0c91-499d-9605-404956c39846",
+      "resourceUri": "us-docker.pkg.dev/bendory-20220720-f/tekton/mini-true@sha256:85b391e60f9764cacae0774aa70482c1ffbad68ee66c2d184178c7efb06563a0",
+      "noteName": "projects/bendory-20220720-f/notes/tekton-default-simplesigning",
+      "kind": "ATTESTATION",
+      "createTime": "2022-07-21T13:40:31.374921Z",
+      "updateTime": "2022-07-21T13:40:31.374921Z",
+      "envelope": {
+        "payload": "eyJjcml0aWNhbCI6eyJpZGVudGl0eSI6eyJkb2NrZXItcmVmZXJlbmNlIjoidXMtZG9ja2VyLnBrZy5kZXYvYmVuZG9yeS0yMDIyMDcyMC1mL3Rla3Rvbi9taW5pLXRydWUifSwiaW1hZ2UiOnsiZG9ja2VyLW1hbmlmZXN0LWRpZ2VzdCI6InNoYTI1Njo4NWIzOTFlNjBmOTc2NGNhY2FlMDc3NGFhNzA0ODJjMWZmYmFkNjhlZTY2YzJkMTg0MTc4YzdlZmIwNjU2M2EwIn0sInR5cGUiOiJjb3NpZ24gY29udGFpbmVyIGltYWdlIHNpZ25hdHVyZSJ9LCJvcHRpb25hbCI6bnVsbH0=",
+        "payloadType": "simplesigning",
+        "signatures": [
+          {
+            "sig": "d11iyRyGfOtUVBfKRG6SPm6bczsxe7F2uwsTAly7uNTTGAqWGTH6nzqReTmvvRWa0DfW0omSrvrSKPVawFU47ysv/9X1R2uMMUA0qtFQW0xBrB7goJ3jU3hTjv2/ocG3Wz3RNS4WBHQtUlnxJiiwBAzJZqyu0U8o73KSM0AnlFueBD5EBINKB0plMuSy+WBR/NMzo6v1egMkj1IuZDA0RrQjPl5GPtdLxKRhcZvAkGKKOetrkON9b3uUuL4RsJC1R6heyDWtHQ3yrOLr+ZUejN4SE8aij3BJ+dDIK0/aCQ7esZrE/Zrr7MpjVDef6Ucu0sfItQms+5XuFGErG/2GRw==",
+            "keyid": "gcpkms://projects/bendory-20220720-f/locations/us/keyRings/tekton-keyring/cryptoKeys/tekton-signing-key"
+          }
+        ]
+      },
+      "attestation": {
+        "serializedPayload": "eyJjcml0aWNhbCI6eyJpZGVudGl0eSI6eyJkb2NrZXItcmVmZXJlbmNlIjoidXMtZG9ja2VyLnBrZy5kZXYvYmVuZG9yeS0yMDIyMDcyMC1mL3Rla3Rvbi9taW5pLXRydWUifSwiaW1hZ2UiOnsiZG9ja2VyLW1hbmlmZXN0LWRpZ2VzdCI6InNoYTI1Njo4NWIzOTFlNjBmOTc2NGNhY2FlMDc3NGFhNzA0ODJjMWZmYmFkNjhlZTY2YzJkMTg0MTc4YzdlZmIwNjU2M2EwIn0sInR5cGUiOiJjb3NpZ24gY29udGFpbmVyIGltYWdlIHNpZ25hdHVyZSJ9LCJvcHRpb25hbCI6bnVsbH0=",
+        "signatures": [
+          {
+            "signature": "d11iyRyGfOtUVBfKRG6SPm6bczsxe7F2uwsTAly7uNTTGAqWGTH6nzqReTmvvRWa0DfW0omSrvrSKPVawFU47ysv/9X1R2uMMUA0qtFQW0xBrB7goJ3jU3hTjv2/ocG3Wz3RNS4WBHQtUlnxJiiwBAzJZqyu0U8o73KSM0AnlFueBD5EBINKB0plMuSy+WBR/NMzo6v1egMkj1IuZDA0RrQjPl5GPtdLxKRhcZvAkGKKOetrkON9b3uUuL4RsJC1R6heyDWtHQ3yrOLr+ZUejN4SE8aij3BJ+dDIK0/aCQ7esZrE/Zrr7MpjVDef6Ucu0sfItQms+5XuFGErG/2GRw==",
+            "publicKeyId": "gcpkms://projects/bendory-20220720-f/locations/us/keyRings/tekton-keyring/cryptoKeys/tekton-signing-key"
+          }
+        ]
+      }
+    }
+  ]
+}
