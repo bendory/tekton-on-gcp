@@ -11,7 +11,7 @@ build-and-push of container to AR.
 7. Provenance will be captured in Container Analysis, and the `./verify_*`
    scripts can be used to verify `kms` signatures.
 
-NOTE: When you run `setup.sh`,a new `kubectl` configuration will be created and
+NOTE: When you run `setup.sh`, a new `kubectl` configuration will be created and
 will be active when `setup.sh` completes. The other scripts assume that
 configuration is the active configuration.
 
