@@ -144,7 +144,7 @@ gcloud --project=${PROJECT} kms keys add-iam-policy-binding "${KEY}" \
     --member="domain:google.com" --role="roles/cloudkms.verifier"
 
 # Configure signatures
-kubectl patch configmap chains-config -n tekton-chains -p='{"data":{
+kubectl patch configmap chains-config -n "${CHAINS_NS}" -p='{"data":{
     "artifacts.oci.format": "simplesigning",
     "artifacts.oci.signer": "kms",
     "artifacts.oci.storage": "grafeas",
@@ -153,8 +153,8 @@ kubectl patch configmap chains-config -n tekton-chains -p='{"data":{
     "artifacts.taskrun.storage": "grafeas" }}'
 
 export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
-kubectl patch configmap chains-config -n tekton-chains -p="{\"data\": {\"signers.kms.kmsref\": \"${KMS_REF}\"}}"
-kubectl patch configmap chains-config -n tekton-chains -p="{\"data\": {\"storage.grafeas.projectid\": \"${PROJECT}\"}}"
+kubectl patch configmap chains-config -n "${CHAINS_NS}" -p="{\"data\": {\"signers.kms.kmsref\": \"${KMS_REF}\"}}"
+kubectl patch configmap chains-config -n "${CHAINS_NS}" -p="{\"data\": {\"storage.grafeas.projectid\": \"${PROJECT}\"}}"
 
 # Configure Container Analysis
 gcloud --project=${PROJECT} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
