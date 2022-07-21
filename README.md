@@ -26,8 +26,12 @@ gcloud beta billing projects link ${PROJECT} --billing-account=${BILLING_ACCOUNT
 
 ## Verify signatures
 
+Run `verify_provenance.sh` to verify the signed provenance with `kms`.
+
+Run `verify_attestation.sh` to verify the signed attestation with `kms`.
+
 NOTE:
-- To verify signatures, install `cosign` and `jq`.
+- To verify signatures, you must first install `cosign` and `jq`.
 - To authenticate with `cosign`, you need Application Default Credentials, which
   you can put into place like this: `gcloud auth application-default login`.
   This is different from `gcloud auth login`.
@@ -36,7 +40,3 @@ NOTE:
   ```
   Error: verifying blob: <details>: loading public key: loading URL: unrecognized scheme: gcpkms://
   ```
-
-Run `verify_provenance.sh` to verify the signed provenance with `kms`.
-
-Run `verify_attestation.sh` to verify the signed attestation with `kms`.
