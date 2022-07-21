@@ -1,5 +1,5 @@
 # Tekton on GCP
-This repo demonstrated a scripted setup of Tekton on GCP, from standup through end-to-end
+This repo demonstrates a scripted setup of Tekton on GCP, from standup through end-to-end
 build-and-push of container to AR.
 
 1. Set up a GCP project, including billing setup.
