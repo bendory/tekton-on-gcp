@@ -153,8 +153,10 @@ kubectl patch configmap chains-config -n "${CHAINS_NS}" -p='{"data":{
     "artifacts.taskrun.storage": "grafeas" }}'
 
 export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
-kubectl patch configmap chains-config -n "${CHAINS_NS}" -p="{\"data\": {\"signers.kms.kmsref\": \"${KMS_REF}\"}}"
-kubectl patch configmap chains-config -n "${CHAINS_NS}" -p="{\"data\": {\"storage.grafeas.projectid\": \"${PROJECT}\"}}"
+kubectl patch configmap chains-config -n "${CHAINS_NS}" -p="{\"data\": {\
+    \"signers.kms.kmsref\":        \"${KMS_REF}\", \
+    \"storage.grafeas.projectid\": \"${PROJECT}\", \
+    \"builder.id\":                \"$(kubectl config current-context)\" }}"
 
 # Configure Container Analysis
 gcloud --project=${PROJECT} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
