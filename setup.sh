@@ -145,11 +145,11 @@ gcloud --project=${PROJECT} kms keys add-iam-policy-binding "${KEY}" \
 
 # Configure signatures
 kubectl patch configmap chains-config -n "${CHAINS_NS}" -p='{"data":{
-    "artifacts.oci.format": "simplesigning",
-    "artifacts.oci.signer": "kms",
-    "artifacts.oci.storage": "grafeas",
-    "artifacts.taskrun.format": "in-toto",
-    "artifacts.taskrun.signer": "kms",
+    "artifacts.oci.format":      "simplesigning",
+    "artifacts.oci.signer":      "kms",
+    "artifacts.oci.storage":     "grafeas",
+    "artifacts.taskrun.format":  "in-toto",
+    "artifacts.taskrun.signer":  "kms",
     "artifacts.taskrun.storage": "grafeas" }}'
 
 export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
