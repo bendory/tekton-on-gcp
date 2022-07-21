@@ -38,4 +38,5 @@ NOTE:
   ```
 
 Run `verify_provenance.sh` to verify the signed provenance with `kms`.
+
 Run `verify_attestation.sh` to verify the signed attestation with `kms`.
