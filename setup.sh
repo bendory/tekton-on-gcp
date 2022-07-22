@@ -73,8 +73,6 @@ kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-servi
 
 # Install Tekton
 kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-tkn hub install task git-clone
-tkn hub install task kaniko
 
 # Wait for pipelines to be ready.
 unset status
@@ -83,6 +81,10 @@ while [[ "${status}" -ne "Running" ]]; do
   status=$(kubectl get pods --namespace tekton-pipelines -o custom-columns=':status.phase' | sort -u)
 done
 echo "Tekton Pipelines installation completed."
+
+# Install tasks
+tkn hub install task git-clone
+tkn hub install task kaniko
 
 # Install Chains
 #kubectl apply --filename https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
