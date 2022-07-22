@@ -87,26 +87,10 @@ tkn hub install task git-clone
 tkn hub install task kaniko
 
 # Install Chains
+# We need a chains release >=v0.11.0 to pick up a change in the grafeas
+# implementation; latest is currently at v0.9.0.
 #kubectl apply --filename https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
-#
-# For now, we kluge chains installation from HEAD, we need a chains release
-# >v0.9.0 to pick up a change in the grafeas implementation; v0.9.0 doesn't
-# write the NOTE to the current resourceURI.
-export PROJECT_NUM=$(gcloud projects describe "${PROJECT}" --format "value(projectNumber)")
-gcloud projects add-iam-policy-binding "${PROJECT}" \
-    --member="serviceAccount:${PROJECT_NUM}-compute@developer.gserviceaccount.com" \
-    --role='roles/artifactregistry.reader'
-
-HERE=$(pwd)
-TMP=$(mktemp -d)
-cd ${TMP}
-git clone --depth=1 https://github.com/tektoncd/chains.git
-cd chains
-export KO_DOCKER_REPO=${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}
-ko apply -f config/
-cd ${HERE}
-rm -rf ${TMP}
-# END OF CHAINS KLUGE
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/chains/previous/v0.11.0/release.yaml
 
 unset status
 while [[ "${status}" -ne "Running" ]]; do
