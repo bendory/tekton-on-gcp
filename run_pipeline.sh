@@ -9,13 +9,16 @@ if [[ -z "${PROJECT}" ]]; then
   exit 1
 fi;
 
-REPO=tekton
-LOCATION=us
+export CLUSTER=tekton-showcase
+export REGION=us-central1
+export REPO=tekton
+export LOCATION=us
+export CONTEXT=gke_${PROJECT}_${REGION}_${CLUSTER} # context for kubectl
 
 pipelinerun=$(mktemp)
 cp pipelinerun.yaml "${pipelinerun}"
 echo "    value: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/mini-true" >> "${pipelinerun}"
-kubectl create --filename "${pipelinerun}"
+kubectl --context=${CONTEXT} create --filename "${pipelinerun}"
 
 # Wait for completion!
-tkn pr logs --last -f
+kubectl tkn --context=${CONTEXT} pr logs --last -f
