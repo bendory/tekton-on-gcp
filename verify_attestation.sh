@@ -3,20 +3,13 @@
 # Prerequisites:
 # - install `cosign` and `jq`.
 # - set up Application Default Credentials by running `gcloud auth application-default login`.
-# - $PROJECT is set.
 set -e
 
-if [[ -z "${PROJECT}" ]]; then
-  echo "Set envvar PROJECT to your GCP project before running this script."
-  exit 1
-fi;
+dir=$(dirname $0)
+. "${dir}"/env.sh
 
-export CLUSTER=tekton-showcase
-export REGION=us-central1
-export CONTEXT=gke_${PROJECT}_${REGION}_${CLUSTER} # context for kubectl
-
-IMAGE_URL=$(kubectl tkn --context=${CONTEXT} tr describe --last -o jsonpath="{.status.taskResults[1].value}")
-IMAGE_DIGEST=$(kubectl tkn --context=${CONTEXT} tr describe --last -o jsonpath="{.status.taskResults[0].value}")
+IMAGE_URL=$(${tkn} tr describe --last -o jsonpath="{.status.taskResults[1].value}")
+IMAGE_DIGEST=$(${tkn} tr describe --last -o jsonpath="{.status.taskResults[0].value}")
 
 alias gcurl='curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $(gcloud auth print-access-token)"'
 query_url="https://containeranalysis.googleapis.com/v1/projects/$PROJECT/occurrences?filter=resourceUrl=\"${IMAGE_URL}@${IMAGE_DIGEST}\"%20AND%20kind=\"ATTESTATION\""
