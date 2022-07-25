@@ -5,12 +5,13 @@ dir=$(dirname $0)
 . "${dir}"/env.sh
 
 # Start API enablements so we don't have to wait for them below.
-${gcloud} services enable artifactregistry.googleapis.com --async  # AR
-${gcloud} services enable cloudkms.googleapis.com --async          # KMS
-${gcloud} services enable compute.googleapis.com --async           # GCE
-${gcloud} services enable container.googleapis.com --async         # GKE
-${gcloud} services enable containeranalysis.googleapis.com --async # Container Analysis
-${gcloud} services enable iam.googleapis.com --async               # IAM
+${gcloud} services enable artifactregistry.googleapis.com --async    # AR
+${gcloud} services enable cloudkms.googleapis.com --async            # KMS
+${gcloud} services enable compute.googleapis.com --async             # GCE
+${gcloud} services enable container.googleapis.com --async           # GKE
+${gcloud} services enable containeranalysis.googleapis.com --async   # Container Analysis
+${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming images
+${gcloud} services enable iam.googleapis.com --async                 # IAM
 
 # Can't set properties until APIs are enabled!
 ${gcloud} services enable compute.googleapis.com # Ensure GCE is enabled
@@ -31,11 +32,15 @@ ${gcloud} artifacts repositories create "${REPO}" \
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member="serviceAccount:${BUILDER_SA}" --role='roles/artifactregistry.writer'
 
-# Set up GKE with Workload Identity
+# Set up GKE with Workload Identity and Image Streaming
 # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
-${gcloud} services enable container.googleapis.com # Ensure GKE is enabled
+# https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming
+${gcloud} services enable \
+    container.googleapis.com \
+    containerfilesystem.googleapis.com # Ensure Image Streaming is enabled
 ${gcloud} container clusters create "${CLUSTER}" \
-    --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog"
+    --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog" \
+    --image-type="COS_CONTAINERD" --enable-image-streaming
 ${gcloud} container node-pools update "${NODE_POOL}" \
     --region=${REGION} --cluster="${CLUSTER}" --workload-metadata=GKE_METADATA
 ${gcloud} container clusters \
