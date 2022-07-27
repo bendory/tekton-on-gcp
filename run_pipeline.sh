@@ -5,7 +5,7 @@ dir=$(dirname $0)
 . "${dir}"/env.sh
 
 pipelinerun=$(mktemp)
-cp pipelinerun.yaml "${pipelinerun}"
+cp "${dir}/pipelinerun.yaml" "${pipelinerun}"
 echo "    value: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/mini-true" >> "${pipelinerun}"
 ${kubectl} create --filename "${pipelinerun}"
 rm -rf "${pipelinerun}"

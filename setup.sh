@@ -136,6 +136,6 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}"
 
 # Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
-${kubectl} apply --filename pipeline.yaml
+${kubectl} apply --filename "${dir}/pipeline.yaml"
 
 echo "Setup complete! Run ./run_pipeline.sh to build and push your first container."
