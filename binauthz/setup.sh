@@ -22,7 +22,15 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
 
 # Enable binauth API and set up a cluster with binauthz enabled.
 ${gcloud} services enable binaryauthorization.googleapis.com
-${gcloud} container binauthz policy import policy.yaml
+
+# Set up binauth policy
+policy=$(mktemp)
+cp "${dir}/policy.yaml" "${policy}"
+echo "- namePattern: us-docker.pkg.dev/${PROJECT}/${REPO}/allow" >> "${policy}"
+${gcloud} container binauthz policy import "${policy}"
+rm -rf "${policy}"
+
+# Create cluster with binauthz enabled.
 ${gcloud} container clusters create --enable-binauthz \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
 	--region="${REGION}" --machine-type="e2-micro" "${CLUSTER}"
