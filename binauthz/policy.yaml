@@ -2,3 +2,11 @@ globalPolicyEvaluationMode: ENABLE
 defaultAdmissionRule:
   evaluationMode: ALWAYS_DENY
   enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+clusterAdmissionRules:
+  us-central1.tekton-showcase:
+    evaluationMode: ALWAYS_ALLOW
+    enforcementMode: DRYRUN_AUDIT_LOG_ONLY
+  us-central1.prod-secure:
+    evaluationMode: ALWAYS_DENY
+    enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
+admissionWhitelistPatterns:
