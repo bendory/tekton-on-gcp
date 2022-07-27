@@ -15,8 +15,9 @@ if [[ -z "${ACCOUNT}" ]]; then
   exit 1
 fi;
 
-export CLUSTER=secure-prod
+export CLUSTER=prod
 export REGION=us-central1
+export REPO=my-repo
 export CONTEXT=gke_${PROJECT}_${REGION}_${CLUSTER} # context for kubectl
 
 # Pre-requisites: installation of Cloud SDK, kubectl, tkn
