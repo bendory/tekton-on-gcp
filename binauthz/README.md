@@ -1,5 +1,6 @@
 # Binary Authorization
-This directory demonstrates a scripted setup of Binary Authorization on GKE.
+This directory demonstrates a scripted setup of [Binary
+Authorization](https://cloud.google.com/binary-authorization) on GKE.
 Before coming here, you should have run `../setup.sh` (in the parent directory)
 and the assets created by that script should still be standing.
 
