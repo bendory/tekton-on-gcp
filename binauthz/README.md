@@ -14,7 +14,7 @@ and the assets created by that script should still be standing.
 4. You can deploy this image to your `prod` cluster by running `./deploy.sh`.
    The deploy script will also attempt to deploy a disallowed image. It will
    then run `kubectl get deployments` (where you will see only one of the
-   deployments running) and then `kubectl get events` where you will see the
+   deployments available) and then `kubectl get events` where you will see the
    `deny` message.
 
 ## Example output
