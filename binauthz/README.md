@@ -3,8 +3,8 @@ This directory demonstrates a scripted setup of Binary Authorization on GKE.
 Before coming here, you should have run `../setup.sh` (in the parent directory)
 and the assets created by that script should still be standing.
 
-1. Run `../setup.sh` in the parent directory. This creates a `tekton`
-   cluster where your demo CI/CD pipelines live.
+1. `../setup.sh` (in the parent directory) creates a `tekton` cluster where
+   your demo CI/CD pipelines live.
 2. Run `./setup.sh` herein to stand up a new `prod` cluster with Binary
    Authorization enabled. This is where your production assets are 
    deployed in this demo.
