@@ -16,8 +16,10 @@ if [[ -z "${ACCOUNT}" ]]; then
 fi;
 
 export CLUSTER=prod
+export LOCATION=us
 export REGION=us-central1
 export REPO=my-repo
+export IMAGE=allow
 export CONTEXT=gke_${PROJECT}_${REGION}_${CLUSTER} # context for kubectl
 
 # Pre-requisites: installation of Cloud SDK, kubectl, tkn
