@@ -5,6 +5,7 @@ set -e
 
 dir=$(dirname $0)
 . "${dir}"/../env.sh
+IMAGE=allow
 
 ${kubectl} apply --filename "${dir}/pipeline.yaml"
 
