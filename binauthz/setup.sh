@@ -26,7 +26,7 @@ ${gcloud} services enable binaryauthorization.googleapis.com
 # Set up binauth policy
 policy=$(mktemp)
 cp "${dir}/policy.yaml" "${policy}"
-echo "- namePattern: us-docker.pkg.dev/${PROJECT}/${REPO}/allow" >> "${policy}"
+echo "- namePattern: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/${IMAGE}" >> "${policy}"
 ${gcloud} container binauthz policy import "${policy}"
 rm -rf "${policy}"
 
