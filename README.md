@@ -12,8 +12,7 @@ build-and-push of container to AR.
    scripts can be used to verify `kms` signatures.
 
 NOTE: When you run `setup.sh`, a new `kubectl` configuration will be created and
-will be active when `setup.sh` completes. The other scripts assume that
-configuration is the active configuration.
+will be your active context when `setup.sh` completes.
 
 ## Example
 
