@@ -32,6 +32,7 @@ ${gcloud} container binauthz policy import "${policy}"
 rm -rf "${policydir}"
 
 # Create cluster with binauthz enabled.
-${gcloud} container clusters create --enable-binauthz \
+${gcloud} container clusters create \
+	--binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
 	--region="${REGION}" --machine-type="e2-micro" "${CLUSTER}"
