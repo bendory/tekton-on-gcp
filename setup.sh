@@ -65,6 +65,7 @@ echo "Tekton Pipelines installation completed."
 
 # Install tasks
 ${tkn} hub install task git-clone
+sleep 1 # No idea why we need to pause here to prevent flakes.
 ${tkn} hub install task kaniko
 
 # Install Chains
