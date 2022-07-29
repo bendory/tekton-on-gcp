@@ -5,6 +5,7 @@ set -e
 
 dir=$(dirname $0)/..
 . "${dir}"/env.sh
+dir=$(dirname $0)
 
 ${kubectl} apply --filename "${dir}/pipeline.yaml"
 
