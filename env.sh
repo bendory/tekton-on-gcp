@@ -1,6 +1,8 @@
 #!/bin/sh
 
-dir=$(dirname $0)
+if [[ -z "${dir}" ]]; then
+  dir=$(dirname $0)
+fi
 . "${dir}"/shared_env.sh
 
 export CLUSTER=tekton
