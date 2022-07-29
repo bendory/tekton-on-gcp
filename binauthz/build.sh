@@ -3,9 +3,8 @@
 # ${CLUSTER} created by the setup.sh script in this directory.
 set -e
 
-dir=$(dirname $0)
-. "${dir}"/../env.sh
-IMAGE=allow
+dir=$(dirname $0)/..
+. "${dir}"/env.sh
 
 ${kubectl} apply --filename "${dir}/pipeline.yaml"
 
