@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 
 dir=$(dirname $0)
 . "${dir}"/env.sh
@@ -23,6 +23,31 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
 # Enable binauth API and set up a cluster with binauthz enabled.
 ${gcloud} services enable binaryauthorization.googleapis.com
 
+# Set up the attestor
+# https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#5
+# The note name "tekton-default-simplesigning" comes from Tekton Chains.
+NOTE_ID=projects/${PROJECT}/notes/tekton-default-simplesigning
+# Allow ATTESTOR_SA to read notes.
+ATTESTOR_SA=service-${PROJECT_NUMBER}@gcp-sa-binaryauthorization.iam.gserviceaccount.com
+${gcloud} projects add-iam-policy-binding $PROJECT \
+    --member="serviceAccount:${ATTESTOR_SA}" \
+    --role=roles/containeranalysis.notes.occurrences.viewer
+
+# Create the attestor; note that the attestor must be set up before the binauthz
+# policy referencing it is applied.
+${gcloud} container binauthz attestors create "${ATTESTOR_NAME}" \
+    --attestation-authority-note="${NOTE_ID}" \
+    --attestation-authority-note-project="${PROJECT}"
+
+# Add the key to the attestor
+${gcloud} container binauthz attestors public-keys add \
+    --attestor="${ATTESTOR_NAME}" \
+    --keyversion-project="${PROJECT}" \
+    --keyversion-location="${LOCATION}" \
+    --keyversion-keyring="${KEYRING}" \
+    --keyversion-key="${KEY}" \
+    --keyversion="1"
+
 # Set up binauth policy
 policydir=$(mktemp -d)
 policy="${policydir}/policy.yaml"
@@ -36,28 +61,4 @@ ${gcloud} container clusters create \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
     --region="${REGION}" --machine-type="e2-micro" "${CLUSTER}"
-
-# Set up the attestor
-# https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#5
-# The note name "tekton-default-simplesigning" comes from Tekton Chains.
-NOTE_ID=projects/${PROJECT}/notes/tekton-default-simplesigning
-# Allow ATTESTOR_SA to read notes.
-ATTESTOR_SA=service-${PROJECT_NUMBER}@gcp-sa-binaryauthorization.iam.gserviceaccount.com
-${gcloud} projects add-iam-policy-binding $PROJECT \
-    --member="serviceAccount:${ATTESTOR_SA}" \
-    --role=roles/containeranalysis.notes.occurrences.viewer
-
-# Create the attestor
-${gcloud} container binauthz attestors create "${ATTESTOR_NAME}" \
-    --attestation-authority-note="${NOTE_ID}" \
-    --attestation-authority-note-project="${PROJECT}"`
-
-# Add the key to the attestor
-${gcloud} container binauthz attestors public-keys add \
-    --attestor="${ATTESTOR_NAME}" \
-    --keyversion-project="${PROJECT}" \
-    --keyversion-location="${LOCATION}" \
-    --keyversion-keyring="${KEYRING}" \
-    --keyversion-key="${KEY}" \
-    --keyversion="1"
 
