@@ -4,7 +4,6 @@ dir=$(dirname $0)
 . "${dir}"/../shared_env.sh
 
 export CLUSTER=prod
-export IMAGE=allow
 export ATTESTOR_NAME=tekton-chains-attestor
 export CONTEXT=gke_${PROJECT}_${REGION}_${CLUSTER} # context for kubectl
 
