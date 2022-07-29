@@ -7,6 +7,6 @@ clusterAdmissionRules:
     evaluationMode: ALWAYS_ALLOW
     enforcementMode: DRYRUN_AUDIT_LOG_ONLY
   us-central1.prod:
-    evaluationMode: ALWAYS_DENY
+    evaluationMode: REQUIRE_ATTESTATION
     enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
-admissionWhitelistPatterns:
+    requireAttestationsBy:
