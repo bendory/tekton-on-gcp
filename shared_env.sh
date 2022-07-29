@@ -17,6 +17,7 @@ fi;
 export NODE_POOL=default-pool
 export REGION=us-central1
 export REPO=my-repo
+export IMAGE=allow
 export LOCATION=us
 export BUILDER=builder
 export BUILDER_SA="${BUILDER}@${PROJECT}.iam.gserviceaccount.com"
