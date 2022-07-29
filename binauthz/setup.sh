@@ -14,7 +14,7 @@ ${gcloud} services enable artifactregistry.googleapis.com \
     containerfilesystem.googleapis.com \
     iam.googleapis.com
 
-# Enable default GKE service account to pull images from AR.
+# Allow default GKE service account to pull images from AR.
 PROJECT_NUMBER=$(${gcloud} projects describe $PROJECT --format='value(projectNumber)')
 ${gcloud} projects add-iam-policy-binding $PROJECT \
     --role=roles/artifactregistry.reader \
@@ -33,6 +33,6 @@ rm -rf "${policydir}"
 
 # Create cluster with binauthz enabled.
 ${gcloud} container clusters create \
-	--binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
+    --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
-	--region="${REGION}" --machine-type="e2-micro" "${CLUSTER}"
+    --region="${REGION}" --machine-type="e2-micro" "${CLUSTER}"
