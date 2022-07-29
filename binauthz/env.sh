@@ -1,25 +1,11 @@
 #!/bin/sh
-set -e
 
-# Pre-requisite: PROJECT is defined
-# Pre-requisite: ${PROJECT} exists in GCP with billing enabled.
-if [[ -z "${PROJECT}" ]]; then
-  echo "Set envvar PROJECT to your GCP project before running this script."
-  exit 1
-fi;
-
-# Pre-requisite: authentication for Cloud SDK
-ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
-if [[ -z "${ACCOUNT}" ]]; then
-  echo "Run 'gcloud auth login' to authenticate on GCP before running this script."
-  exit 1
-fi;
+dir=$(dirname $0)
+. "${dir}"/../shared_env.sh
 
 export CLUSTER=prod
-export LOCATION=us
-export REGION=us-central1
-export REPO=my-repo
 export IMAGE=allow
+export ATTESTOR_NAME=tekton-chains-attestor
 export CONTEXT=gke_${PROJECT}_${REGION}_${CLUSTER} # context for kubectl
 
 # Pre-requisites: installation of Cloud SDK, kubectl, tkn
