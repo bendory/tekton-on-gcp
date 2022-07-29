@@ -1,5 +1,5 @@
 #!/bin/sh
-set -ex
+set -e
 
 dir=$(dirname $0)
 . "${dir}"/env.sh
