@@ -13,12 +13,8 @@ ${gcloud} services enable containeranalysis.googleapis.com --async   # Container
 ${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming images
 ${gcloud} services enable iam.googleapis.com --async                 # IAM
 
-
-# Let all Googlers view this project
-${gcloud} services enable iam.googleapis.com # Ensure IAM is enabled
-${gcloud} projects add-iam-policy-binding "${PROJECT}" --member='domain:google.com' --role='roles/viewer'
-
 # Create the BUILDER_SA
+${gcloud} services enable iam.googleapis.com # Ensure IAM is enabled
 ${gcloud} iam service-accounts create "${BUILDER}" \
     --description="Tekton Build-time Service Account" \
     --display-name="Tekton Builder"
@@ -105,9 +101,6 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
 ${gcloud} kms keys add-iam-policy-binding "${KEY}" \
     --keyring="${KEYRING}" --location="${LOCATION}" \
     --member="serviceAccount:${VERIFIER_SA}" --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
-${gcloud} kms keys add-iam-policy-binding "${KEY}" \
-    --keyring="${KEYRING}" --location="${LOCATION}" \
-    --member="domain:google.com" --role="roles/cloudkms.verifier"
 
 # Configure signatures
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
