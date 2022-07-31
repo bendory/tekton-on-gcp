@@ -2,7 +2,7 @@
 set -e
 
 dir=$(dirname $0)
-. "${dir}"/env.sh
+. "${dir}"/../env.sh
 
 # These APIs should all have been enabled during Tekton installation, so this
 # should be a no-op.
@@ -60,5 +60,5 @@ rm -rf "${policydir}"
 ${gcloud} container clusters create \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
-    --region="${REGION}" --machine-type="e2-micro" "${CLUSTER}"
+    --region="${REGION}" --machine-type="e2-micro" "${PROD_CLUSTER}"
 

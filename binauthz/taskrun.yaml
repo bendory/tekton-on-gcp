@@ -1,9 +1,9 @@
 apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
+kind: TaskRun
 metadata:
   generateName: simple-build-run-
 spec:
-  pipelineRef:
+  taskRef:
     name: simple-build
   workspaces:
   - name: shared-data
@@ -15,4 +15,4 @@ spec:
           requests:
             storage: 1Gi
   params:
-  - name: image-reference
+  - name: IMAGE

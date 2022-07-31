@@ -7,7 +7,7 @@ dir=$(dirname $0)
 pipelinerun=$(mktemp)
 cp "${dir}/pipelinerun.yaml" "${pipelinerun}"
 echo "    value: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/true" >> "${pipelinerun}"
-${kubectl} create --filename "${pipelinerun}"
+${k_tekton} create --filename "${pipelinerun}"
 rm -rf "${pipelinerun}"
 
 # Wait for completion!

@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: simple-build
+spec:
+  description: | 
+    This task builds a Docker image with Kaniko and pushes it to a registry.
+  params:
+  - name: IMAGE
+    description: Name (reference) of the image to build.
+  results:
+  - name: IMAGE_DIGEST
+    description: Digest of the image just built.
+  - name: IMAGE_URL
+    description: URL of the image just built.
+  workspaces:
+  - name: shared-data
+  steps:
+  - name: create-dockerfile
+    workingDir: "$(workspaces.shared-data.path)"
+    image: docker.io/library/bash:5.1.4@sha256:b208215a4655538be652b2769d82e576bc4d0a2bb132144c060efc5be8c3f5d6
+    script: |
+      set -e
+      cat > Dockerfile <<EOF
+      FROM alpine
+      CMD tail -f /dev/null
+      EOF
+  - name: build-push
+    workingDir: "$(workspaces.shared-data.path)"
+    image: gcr.io/kaniko-project/executor
+    args:
+    - --dockerfile=Dockerfile
+    - --context=.
+    - --destination=$(params.IMAGE)
+    - --digest-file=$(results.IMAGE_DIGEST.path)
+  - name: write-url
+    image: docker.io/library/bash:5.1.4@sha256:b208215a4655538be652b2769d82e576bc4d0a2bb132144c060efc5be8c3f5d6
+    script: |
+        set -e
+        echo -n "$(params.IMAGE)" | tee "$(results.IMAGE_URL.path)"

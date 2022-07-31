@@ -1,10 +1,10 @@
 #!/bin/sh
-# This script will deploy ${IMAGE} to ${CLUSTER} and demonstrate binauth
+# This script will deploy ${IMAGE} to ${PROD_CLUSTER} and demonstrate binauth
 # enforcement by attempting to deploy a blocked image.
 set -e
 
 dir=$(dirname $0)
-. "${dir}"/env.sh
+. "${dir}"/../env.sh
 
 REPO="${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}"
 
@@ -32,12 +32,12 @@ ${gcloud} beta container binauthz attestations sign-and-create \
     --keyversion=1
 
 # This deployment is allowed.
-${kubectl} create deployment allowed --image="${CONTAINER_PATH}"
+${k_prod} create deployment allowed --image="${CONTAINER_PATH}"
 
 # This deployment is blocked; that the image doesn't exist is irrelevant, it is
 # blocked by binauthz because there is no attestation for the given sha.
-${kubectl} create deployment blocked --image="${REPO}/deny@sha256:dead1234567890beef1234567890cafe1234567890bad1234567890deed12345"
+${k_prod} create deployment blocked --image="${REPO}/deny@sha256:dead1234567890beef1234567890cafe1234567890bad1234567890deed12345"
 
-${kubectl} get deployments
+${k_prod} get deployments
 
-${kubectl} get events | fgrep "${REPO}"
+${k_prod} get events | fgrep "${REPO}"

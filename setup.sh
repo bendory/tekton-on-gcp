@@ -38,28 +38,28 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
 ${gcloud} services enable \
     container.googleapis.com \
     containerfilesystem.googleapis.com # Ensure Image Streaming is enabled
-${gcloud} container clusters create "${CLUSTER}" \
+${gcloud} container clusters create "${TEKTON_CLUSTER}" \
     --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog" \
     --image-type="COS_CONTAINERD" --enable-image-streaming
 ${gcloud} container node-pools update "${NODE_POOL}" \
-    --region=${REGION} --cluster="${CLUSTER}" --workload-metadata=GKE_METADATA
+    --region=${REGION} --cluster="${TEKTON_CLUSTER}" --workload-metadata=GKE_METADATA
 ${gcloud} container clusters \
-    get-credentials --region=${REGION} "${CLUSTER}" # Set up kubectl credentials
+    get-credentials --region=${REGION} "${TEKTON_CLUSTER}" # Set up kubectl credentials
 ${gcloud} iam service-accounts add-iam-policy-binding \
     "${BUILDER_SA}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT}.svc.id.goog[default/default]"
 
-${kubectl} annotate serviceaccount \
+${k_tekton} annotate serviceaccount \
     --namespace default default iam.gke.io/gcp-service-account="${BUILDER_SA}"
 
 # Install Tekton
-${kubectl} apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 
 # Wait for pipelines to be ready.
 unset status
 while [[ "${status}" -ne "Running" ]]; do
   echo "Waiting for Tekton Pipelines installation to complete."
-  status=$(${kubectl} get pods --namespace tekton-pipelines -o custom-columns=':status.phase' | sort -u)
+  status=$(${k_tekton} get pods --namespace tekton-pipelines -o custom-columns=':status.phase' | sort -u)
 done
 echo "Tekton Pipelines installation completed."
 
@@ -71,13 +71,13 @@ ${tkn} hub install task kaniko
 # Install Chains
 # We need a chains release >=v0.11.0 to pick up a change in the grafeas
 # implementation; latest is currently at v0.9.0.
-#${kubectl} apply --filename https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
-${kubectl} apply --filename https://storage.googleapis.com/tekton-releases/chains/previous/v0.11.0/release.yaml
+#${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
+${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/previous/v0.11.0/release.yaml
 
 unset status
 while [[ "${status}" -ne "Running" ]]; do
   echo "Waiting for Tekton Chains installation to complete."
-  status=$(${kubectl} get pods --namespace "${CHAINS_NS}" -o custom-columns=':status.phase' | sort -u)
+  status=$(${k_tekton} get pods --namespace "${CHAINS_NS}" -o custom-columns=':status.phase' | sort -u)
 done
 echo "Tekton Chains installation completed."
 
@@ -88,7 +88,7 @@ ${gcloud} iam service-accounts create "${VERIFIER}" \
 ${gcloud} iam service-accounts add-iam-policy-binding \
     $VERIFIER_SA --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/${VERIFIER}]"
-${kubectl} annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
+${k_tekton} annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
     iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
 # Configure KMS
@@ -111,7 +111,7 @@ ${gcloud} kms keys add-iam-policy-binding "${KEY}" \
     --member="domain:google.com" --role="roles/cloudkms.verifier"
 
 # Configure signatures
-${kubectl} patch configmap chains-config -n "${CHAINS_NS}" \
+${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p='{"data":{
     "artifacts.oci.format":      "simplesigning",
     "artifacts.oci.signer":      "kms",
@@ -121,7 +121,7 @@ ${kubectl} patch configmap chains-config -n "${CHAINS_NS}" \
     "artifacts.taskrun.storage": "grafeas" }}'
 
 export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
-${kubectl} patch configmap chains-config -n "${CHAINS_NS}" \
+${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p="{\"data\": {\
     \"signers.kms.kmsref\":        \"${KMS_REF}\", \
     \"storage.grafeas.projectid\": \"${PROJECT}\", \
@@ -137,6 +137,6 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}"
 
 # Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
-${kubectl} apply --filename "${dir}/pipeline.yaml"
+${k_tekton} apply --filename "${dir}/pipeline.yaml"
 
 echo "Setup complete! Run ./run_pipeline.sh to build and push your first container."
