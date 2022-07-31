@@ -13,8 +13,6 @@ ${gcloud} services enable containeranalysis.googleapis.com --async   # Container
 ${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming images
 ${gcloud} services enable iam.googleapis.com --async                 # IAM
 
-# Can't set properties until APIs are enabled!
-${gcloud} services enable compute.googleapis.com # Ensure GCE is enabled
 
 # Let all Googlers view this project
 ${gcloud} services enable iam.googleapis.com # Ensure IAM is enabled
@@ -36,6 +34,7 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
 # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 # https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming
 ${gcloud} services enable \
+    compute.googleapis.com \
     container.googleapis.com \
     containerfilesystem.googleapis.com # Ensure Image Streaming is enabled
 ${gcloud} container clusters create "${TEKTON_CLUSTER}" \
