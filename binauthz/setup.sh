@@ -14,7 +14,7 @@ ${gcloud} services enable artifactregistry.googleapis.com \
     containerfilesystem.googleapis.com \
     iam.googleapis.com
 
-# Allow default GKE service account to pull images from AR.
+# Allow default GKE service account to pull images from AR for deployment.
 PROJECT_NUMBER=$(${gcloud} projects describe $PROJECT --format='value(projectNumber)')
 ${gcloud} projects add-iam-policy-binding $PROJECT \
     --role=roles/artifactregistry.reader \
