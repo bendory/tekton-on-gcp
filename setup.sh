@@ -107,9 +107,6 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
-${gcloud} kms keys add-iam-policy-binding "${KEY}" \
-    --keyring="${KEYRING}" --location="${LOCATION}" \
-    --member="serviceAccount:${VERIFIER_SA}" --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
 # Configure Tekton Chains to use simplesigning with a KMS key and store the OCI
 # in grafeas (Container Analysis); TaskRuns will be captured using in-toto
