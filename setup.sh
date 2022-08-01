@@ -13,13 +13,15 @@ ${gcloud} services enable containeranalysis.googleapis.com --async   # Container
 ${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming images
 ${gcloud} services enable iam.googleapis.com --async                 # IAM
 
-# Create the BUILDER_SA
+# Create the BUILDER_SA. The BUILDER_SA is the ServiceAccount identity that will
+# be used to authenticate and authorize GCP calls during the build.
 ${gcloud} services enable iam.googleapis.com # Ensure IAM is enabled
 ${gcloud} iam service-accounts create "${BUILDER}" \
     --description="Tekton Build-time Service Account" \
     --display-name="Tekton Builder"
 
-# Set up AR
+# Set up Artifact Registry: create a docker repository and authorize the
+# BUILDER_SA to push images to it.
 ${gcloud} services enable artifactregistry.googleapis.com # Ensure AR is enabled
 ${gcloud} artifacts repositories create "${REPO}" \
     --repository-format=docker --location="${LOCATION}"
@@ -27,7 +29,10 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member="serviceAccount:${BUILDER_SA}" --role='roles/artifactregistry.writer'
 
 # Set up GKE with Workload Identity and Image Streaming
+# Workload Identity is used to map a Kubernetes Service Account to our desired
+# BUILDER_SA.
 # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+# Image Streaming enables faster loading of containers.
 # https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming
 ${gcloud} services enable \
     compute.googleapis.com \
@@ -47,7 +52,7 @@ ${gcloud} iam service-accounts add-iam-policy-binding \
 ${k_tekton} annotate serviceaccount \
     --namespace default default iam.gke.io/gcp-service-account="${BUILDER_SA}"
 
-# Install Tekton
+# Install Tekton Pipelines CRDs.
 ${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 
 # Wait for pipelines to be ready.
@@ -60,11 +65,12 @@ echo "Tekton Pipelines installation completed."
 
 # Install tasks
 ${tkn} hub install task git-clone
-sleep 1 # No idea why a pause prevents flakes.
+sleep 2 # No idea why a pause prevents flakes.
 ${tkn} hub install task kaniko
 
-# Install Chains
-# We need a chains release >=v0.11.0 to pick up a change in the grafeas
+# Install Tekton Chains. Tekton Chains will gather build provenance for images
+# and attest to their provenance from this Tekton installation.
+# We need a chains release >=v0.11.0 to pick up a bugfix in the grafeas
 # implementation; latest is currently at v0.9.0.
 #${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
 ${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/previous/v0.11.0/release.yaml
@@ -76,7 +82,9 @@ while [[ "${status}" -ne "Running" ]]; do
 done
 echo "Tekton Chains installation completed."
 
-# Configure Chains KSA / GSA
+# Configure Workload Identity for the Chains namespace. Chains runs in a
+# different namespace and as a different Kubernetes Service Account in order to
+# separate responsibilities between pipelines and Chains.
 ${gcloud} iam service-accounts create "${VERIFIER}" \
     --description="Tekton Chains Service Account" \
     --display-name="Tekton Chains"
@@ -86,7 +94,8 @@ ${gcloud} iam service-accounts add-iam-policy-binding \
 ${k_tekton} annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
     iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
-# Configure KMS
+# Configure Key Management Service. Set up a private key that will be used by
+# VERIFIER_SA to sign attestations.
 ${gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
 ${gcloud} kms keyrings create "${KEYRING}" --location "${LOCATION}"
 ${gcloud} kms keys create "${KEY}" \
@@ -102,7 +111,9 @@ ${gcloud} kms keys add-iam-policy-binding "${KEY}" \
     --keyring="${KEYRING}" --location="${LOCATION}" \
     --member="serviceAccount:${VERIFIER_SA}" --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-# Configure signatures
+# Configure Tekton Chains to use simplesigning with a KMS key and store the OCI
+# in grafeas (Container Analysis); TaskRuns will be captured using in-toto
+# format, signed with a KMS key and stored in grafeas.
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p='{"data":{
     "artifacts.oci.format":      "simplesigning",
@@ -112,6 +123,8 @@ ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     "artifacts.taskrun.signer":  "kms",
     "artifacts.taskrun.storage": "grafeas" }}'
 
+# Configure the KMS signing key, storage project in Container Analysis, and
+# builder identifier used by Tekton Chains.
 export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p="{\"data\": {\
@@ -119,7 +132,7 @@ ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     \"storage.grafeas.projectid\": \"${PROJECT}\", \
     \"builder.id\":                \"${CONTEXT}\" }}"
 
-# Configure Container Analysis
+# Enable the VERIFIER_SA to write Notes and Occurrences in Container Analysis.
 ${gcloud} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --role roles/containeranalysis.notes.editor \
