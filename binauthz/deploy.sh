@@ -6,7 +6,7 @@ set -e
 dir=$(dirname $0)
 . "${dir}"/../env.sh
 
-REPO="${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}"
+BASE="${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}"
 
 # BUG: There is currently a mismatch between Tekton Chains and binauthz.  Tekton
 # Chains creates a signed attestation matching an image name without a protocol
@@ -19,7 +19,7 @@ REPO="${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}"
 #
 # To work around this issue, we manually sign the image before deployment.
 
-export CONTAINER_PATH=$(${gcloud} container binauthz attestations list --attestor=tekton-chains-attestor --format='value(resourceUri)' | fgrep allow)
+export CONTAINER_PATH=$(${gcloud} artifacts docker images describe ${BASE}/${IMAGE}:latest --format='value(image_summary.fully_qualified_digest)')
 
 ${gcloud} beta container binauthz attestations sign-and-create \
     --artifact-url="${CONTAINER_PATH}" \
@@ -36,7 +36,7 @@ ${k_prod} create deployment allowed --image="${CONTAINER_PATH}"
 
 # This deployment is blocked; that the image doesn't exist is irrelevant, it is
 # blocked by binauthz because there is no attestation for the given sha.
-${k_prod} create deployment blocked --image="${REPO}/deny@sha256:dead1234567890beef1234567890cafe1234567890bad1234567890deed12345"
+${k_prod} create deployment blocked --image="${BASE}/deny@sha256:dead1234567890beef1234567890cafe1234567890bad1234567890deed12345"
 
 ${k_prod} get deployments
 
