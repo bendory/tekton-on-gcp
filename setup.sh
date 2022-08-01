@@ -104,7 +104,7 @@ ${gcloud} kms keys create "${KEY}" \
     --purpose "asymmetric-signing" \
     --default-algorithm "rsa-sign-pkcs1-2048-sha256"
 ${gcloud} kms keys add-iam-policy-binding "${KEY}" \
-    --location="${LOCATION}" --keyring="${keyring}" \
+    --location="${LOCATION}" --keyring="${KEYRING}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
