@@ -29,6 +29,36 @@ ${gcloud} artifacts repositories create "${REPO}" \
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member="serviceAccount:${BUILDER_SA}" --role='roles/artifactregistry.writer'
 
+# Set up VERIFIER_SA.
+${gcloud} iam service-accounts create "${VERIFIER}" \
+    --description="Tekton Chains Service Account" \
+    --display-name="Tekton Chains"
+
+# Enable the VERIFIER_SA to write Notes and Occurrences in Container Analysis.
+${gcloud} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
+${gcloud} projects add-iam-policy-binding "${PROJECT}" \
+    --role roles/containeranalysis.notes.editor \
+    --member "serviceAccount:${VERIFIER_SA}"
+${gcloud} projects add-iam-policy-binding "${PROJECT}" \
+    --role roles/containeranalysis.occurrences.editor \
+    --member "serviceAccount:${VERIFIER_SA}"
+
+# Configure Key Management Service. Set up a private key that will be used by
+# VERIFIER_SA to sign attestations.
+${gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
+${gcloud} kms keyrings create "${KEYRING}" --location "${LOCATION}"
+${gcloud} kms keys create "${KEY}" \
+    --keyring "${KEYRING}" \
+    --location "${LOCATION}" \
+    --purpose "asymmetric-signing" \
+    --default-algorithm "rsa-sign-pkcs1-2048-sha256"
+${gcloud} kms keys add-iam-policy-binding "${KEY}" \
+    --location="${LOCATION}" --keyring="${KEYRING}" \
+    --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
+${gcloud} kms keys add-iam-policy-binding "${KEY}" \
+    --location="${LOCATION}" --keyring="${KEYRING}" \
+    --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
+
 # Set up GKE with Workload Identity, Binary Authorization, and Image Streaming
 # Workload Identity is used to map a Kubernetes Service Account to our desired
 # BUILDER_SA.
@@ -87,30 +117,11 @@ echo "Tekton Chains installation completed."
 # Configure Workload Identity for the Chains namespace. Chains runs in a
 # different namespace and as a different Kubernetes Service Account in order to
 # separate responsibilities between pipelines and Chains.
-${gcloud} iam service-accounts create "${VERIFIER}" \
-    --description="Tekton Chains Service Account" \
-    --display-name="Tekton Chains"
 ${gcloud} iam service-accounts add-iam-policy-binding \
     $VERIFIER_SA --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:$PROJECT.svc.id.goog[${CHAINS_NS}/${VERIFIER}]"
 ${k_tekton} annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
     iam.gke.io/gcp-service-account=${VERIFIER_SA}
-
-# Configure Key Management Service. Set up a private key that will be used by
-# VERIFIER_SA to sign attestations.
-${gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
-${gcloud} kms keyrings create "${KEYRING}" --location "${LOCATION}"
-${gcloud} kms keys create "${KEY}" \
-    --keyring "${KEYRING}" \
-    --location "${LOCATION}" \
-    --purpose "asymmetric-signing" \
-    --default-algorithm "rsa-sign-pkcs1-2048-sha256"
-${gcloud} kms keys add-iam-policy-binding "${KEY}" \
-    --location="${LOCATION}" --keyring="${KEYRING}" \
-    --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
-${gcloud} kms keys add-iam-policy-binding "${KEY}" \
-    --location="${LOCATION}" --keyring="${KEYRING}" \
-    --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
 
 # Configure Tekton Chains to use simplesigning with a KMS key and store the OCI
 # in grafeas (Container Analysis); TaskRuns will be captured using in-toto
@@ -132,15 +143,6 @@ ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     \"signers.kms.kmsref\":        \"${KMS_REF}\", \
     \"storage.grafeas.projectid\": \"${PROJECT}\", \
     \"builder.id\":                \"${CONTEXT}\" }}"
-
-# Enable the VERIFIER_SA to write Notes and Occurrences in Container Analysis.
-${gcloud} services enable containeranalysis.googleapis.com # Ensure Container Analysis is enabled.
-${gcloud} projects add-iam-policy-binding "${PROJECT}" \
-    --role roles/containeranalysis.notes.editor \
-    --member "serviceAccount:${VERIFIER_SA}"
-${gcloud} projects add-iam-policy-binding "${PROJECT}" \
-    --role roles/containeranalysis.occurrences.editor \
-    --member "serviceAccount:${VERIFIER_SA}"
 
 # Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
 ${k_tekton} apply --filename "${dir}/pipeline.yaml"
