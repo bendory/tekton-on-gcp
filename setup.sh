@@ -24,6 +24,7 @@ ${gcloud} iam service-accounts create "${BUILDER}" \
 # Set up Artifact Registry: create a docker repository and authorize the
 # BUILDER_SA to push images to it.
 ${gcloud} services enable artifactregistry.googleapis.com # Ensure AR is enabled
+sleep 5 # This pause reduces flakes, presumably the API enablement needs to propagate.
 ${gcloud} artifacts repositories create "${REPO}" \
     --repository-format=docker --location="${LOCATION}"
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
@@ -97,7 +98,7 @@ echo "Tekton Pipelines installation completed."
 
 # Install tasks
 ${tkn} hub install task git-clone
-sleep 2 # No idea why a pause reduces flakes.
+sleep 5 # No idea why a pause reduces flakes.
 ${tkn} hub install task kaniko || ${tkn} hub install task kaniko
 
 # Install Tekton Chains. Tekton Chains will gather build provenance for images
