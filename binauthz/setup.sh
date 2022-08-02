@@ -7,6 +7,7 @@ dir=$(dirname $0)
 # These APIs should all have been enabled during Tekton installation, so this
 # should be a no-op.
 ${gcloud} services enable artifactregistry.googleapis.com \
+    binaryauthorization.googleapis.com \
     cloudkms.googleapis.com \
     compute.googleapis.com \
     container.googleapis.com \
@@ -19,9 +20,6 @@ PROJECT_NUMBER=$(${gcloud} projects describe $PROJECT --format='value(projectNum
 ${gcloud} projects add-iam-policy-binding $PROJECT \
     --role=roles/artifactregistry.reader \
     --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com
-
-# Enable binauth API and set up a cluster with binauthz enabled.
-${gcloud} services enable binaryauthorization.googleapis.com
 
 # Set up the attestor
 # https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#5
@@ -60,5 +58,5 @@ rm -rf "${policydir}"
 ${gcloud} container clusters create \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
-    --region="${REGION}" --machine-type="e2-micro" "${PROD_CLUSTER}"
+    --num-nodes=1 --region="${REGION}" --machine-type="e2-micro" "${PROD_CLUSTER}"
 
