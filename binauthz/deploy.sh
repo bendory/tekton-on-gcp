@@ -9,7 +9,7 @@ dir=$(dirname $0)
 BASE="${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}"
 
 # Resolve :latest to a specific digest.
-export CONTAINER_PATH=$(${gcloud} artifacts docker images describe ${BASE}/${IMAGE}:latest --format='value(image_summary.fully_qualified_digest)')
+CONTAINER_PATH=$(${gcloud} artifacts docker images describe ${BASE}/${IMAGE}:latest --format='value(image_summary.fully_qualified_digest)')
 
 # This deployment is allowed.
 ${k_prod} create deployment allowed --image="${CONTAINER_PATH}"
