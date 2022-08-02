@@ -67,8 +67,8 @@ echo "Tekton Pipelines installation completed."
 
 # Install tasks
 ${tkn} hub install task git-clone
-sleep 2 # No idea why a pause prevents flakes.
-${tkn} hub install task kaniko
+sleep 2 # No idea why a pause reduces flakes.
+${tkn} hub install task kaniko || ${tkn} hub install task kaniko
 
 # Install Tekton Chains. Tekton Chains will gather build provenance for images
 # and attest to their provenance from this Tekton installation.
