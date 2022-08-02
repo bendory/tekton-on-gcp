@@ -24,7 +24,6 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
 # Set up the attestor
 # https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#5
 # The note name "tekton-default-simplesigning" comes from Tekton Chains.
-NOTE_ID=projects/${PROJECT}/notes/tekton-default-simplesigning
 # Allow ATTESTOR_SA to read notes.
 ATTESTOR_SA=service-${PROJECT_NUMBER}@gcp-sa-binaryauthorization.iam.gserviceaccount.com
 ${gcloud} projects add-iam-policy-binding $PROJECT \
@@ -33,6 +32,7 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
 
 # Create the attestor; note that the attestor must be set up before the binauthz
 # policy referencing it is applied.
+NOTE_ID=projects/${PROJECT}/notes/tekton-default-simplesigning
 ${gcloud} container binauthz attestors create "${ATTESTOR_NAME}" \
     --attestation-authority-note="${NOTE_ID}" \
     --attestation-authority-note-project="${PROJECT}"
