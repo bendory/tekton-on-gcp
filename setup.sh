@@ -11,7 +11,7 @@ ${gcloud} services enable cloudkms.googleapis.com --async            # KMS
 ${gcloud} services enable compute.googleapis.com --async             # GCE
 ${gcloud} services enable container.googleapis.com --async           # GKE
 ${gcloud} services enable containeranalysis.googleapis.com --async   # Container Analysis
-${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming images
+${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming Images
 ${gcloud} services enable iam.googleapis.com --async                 # IAM
 
 # Create the BUILDER_SA. The BUILDER_SA is the ServiceAccount identity that will
