@@ -6,13 +6,7 @@ spec:
   taskRef:
     name: simple-build
   workspaces:
-  - name: shared-data
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
+  - name: working-dir
+    emptyDir: {}
   params:
   - name: IMAGE
