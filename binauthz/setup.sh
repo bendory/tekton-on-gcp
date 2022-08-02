@@ -37,14 +37,19 @@ ${gcloud} container binauthz attestors create "${ATTESTOR_NAME}" \
     --attestation-authority-note="${NOTE_ID}" \
     --attestation-authority-note-project="${PROJECT}"
 
-# Add the key to the attestor
+# Add the key to the attestor. The --public-key-id-override tells bunauthz to
+# accept attestations that assert the given override as their publicKeyId.
+# Without this override, binauthz by default expects the publicKeyId to use
+# prefix "//cloudkms.googleapis.com/v1" rather than "gcpkms://". See the
+# definition of KMS_URI in env.sh.
 ${gcloud} container binauthz attestors public-keys add \
     --attestor="${ATTESTOR_NAME}" \
     --keyversion-project="${PROJECT}" \
     --keyversion-location="${LOCATION}" \
     --keyversion-keyring="${KEYRING}" \
     --keyversion-key="${KEY}" \
-    --keyversion="1"
+    --keyversion="${KEY_VERSION}" \
+    --public-key-id-override="${KMS_URI}"
 
 # Set up binauth policy
 policydir=$(mktemp -d)

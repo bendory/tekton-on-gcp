@@ -8,28 +8,8 @@ dir=$(dirname $0)
 
 BASE="${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}"
 
-# BUG: There is currently a mismatch between Tekton Chains and binauthz.  Tekton
-# Chains creates a signed attestation matching an image name without a protocol
-# prefix, such as:
-#    `us-docker.pkg.dev/bendory-20220729-a/my-repo/allow@sha256:35d9febc18674d910ad3945a93fb3bf61fee4f36bca2a6cb80e19b48f7e587db`
-#
-# Binauthz looks for a signed attestation matching an image name that includes a
-# protocol prefix, such as:
-#    `https://us-docker.pkg.dev/bendory-20220729-a/my-repo/allow@sha256:35d9febc18674d910ad3945a93fb3bf61fee4f36bca2a6cb80e19b48f7e587db`
-#
-# To work around this issue, we manually sign the image before deployment.
-
+# Resolve :latest to a specific digest.
 export CONTAINER_PATH=$(${gcloud} artifacts docker images describe ${BASE}/${IMAGE}:latest --format='value(image_summary.fully_qualified_digest)')
-
-${gcloud} beta container binauthz attestations sign-and-create \
-    --artifact-url="${CONTAINER_PATH}" \
-    --attestor="${ATTESTOR_NAME}" \
-    --attestor-project="${PROJECT}" \
-    --keyversion-project="${PROJECT}" \
-    --keyversion-location="${LOCATION}" \
-    --keyversion-keyring="${KEYRING}" \
-    --keyversion-key="${KEY}" \
-    --keyversion=1
 
 # This deployment is allowed.
 ${k_prod} create deployment allowed --image="${CONTAINER_PATH}"

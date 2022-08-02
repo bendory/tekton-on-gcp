@@ -137,10 +137,9 @@ ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
 
 # Configure the KMS signing key, storage project in Container Analysis, and
 # builder identifier used by Tekton Chains.
-export KMS_REF=gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p="{\"data\": {\
-    \"signers.kms.kmsref\":        \"${KMS_REF}\", \
+    \"signers.kms.kmsref\":        \"${KMS_URI}\", \
     \"storage.grafeas.projectid\": \"${PROJECT}\", \
     \"builder.id\":                \"${CONTEXT}\" }}"
 
