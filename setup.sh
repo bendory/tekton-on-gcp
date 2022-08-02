@@ -6,6 +6,7 @@ dir=$(dirname $0)
 
 # Start API enablements so we don't have to wait for them below.
 ${gcloud} services enable artifactregistry.googleapis.com --async    # AR
+${gcloud} services enable binaryauthorization.googleapis.com --async # Binary Authorization
 ${gcloud} services enable cloudkms.googleapis.com --async            # KMS
 ${gcloud} services enable compute.googleapis.com --async             # GCE
 ${gcloud} services enable container.googleapis.com --async           # GKE
@@ -28,21 +29,22 @@ ${gcloud} artifacts repositories create "${REPO}" \
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
     --member="serviceAccount:${BUILDER_SA}" --role='roles/artifactregistry.writer'
 
-# Set up GKE with Workload Identity and Image Streaming
+# Set up GKE with Workload Identity, Binary Authorization, and Image Streaming
 # Workload Identity is used to map a Kubernetes Service Account to our desired
 # BUILDER_SA.
 # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 # Image Streaming enables faster loading of containers.
 # https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming
 ${gcloud} services enable \
+    binaryauthorization.googleapis.com \
     compute.googleapis.com \
     container.googleapis.com \
-    containerfilesystem.googleapis.com # Ensure Image Streaming is enabled
+    containerfilesystem.googleapis.com
 ${gcloud} container clusters create "${TEKTON_CLUSTER}" \
     --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog" \
-    --image-type="COS_CONTAINERD" --enable-image-streaming
-${gcloud} container node-pools update "${NODE_POOL}" \
-    --region=${REGION} --cluster="${TEKTON_CLUSTER}" --workload-metadata=GKE_METADATA
+    --num-nodes=1 --image-type="COS_CONTAINERD" --enable-image-streaming \
+    --binauthz-evaluation-mode="PROJECT_SINGLETON_POLICY_ENFORCE" \
+    --workload-metadata="GKE_METADATA"
 ${gcloud} container clusters \
     get-credentials --region=${REGION} "${TEKTON_CLUSTER}" # Set up kubectl credentials
 ${gcloud} iam service-accounts add-iam-policy-binding \
