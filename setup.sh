@@ -108,7 +108,8 @@ ${gcloud} kms keys create "${KEY}" \
 ${gcloud} kms keys add-iam-policy-binding "${KEY}" \
     --location="${LOCATION}" --keyring="${KEYRING}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
-${gcloud} projects add-iam-policy-binding "${PROJECT}" \
+${gcloud} kms keys add-iam-policy-binding "${KEY}" \
+    --location="${LOCATION}" --keyring="${KEYRING}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
 
 # Configure Tekton Chains to use simplesigning with a KMS key and store the OCI
