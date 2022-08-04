@@ -32,6 +32,7 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
 
 # Create the attestor; note that the attestor must be set up before the binauthz
 # policy referencing it is applied.
+# https://cloud.google.com/binary-authorization/docs/creating-attestors-cli
 NOTE_ID=projects/${PROJECT}/notes/tekton-default-simplesigning
 ${gcloud} container binauthz attestors create "${ATTESTOR_NAME}" \
     --attestation-authority-note="${NOTE_ID}" \
@@ -52,6 +53,7 @@ ${gcloud} container binauthz attestors public-keys add \
     --public-key-id-override="${KMS_URI}"
 
 # Set up binauth policy
+# https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#3
 policydir=$(mktemp -d)
 policy="${policydir}/policy.yaml"
 cp "${dir}/policy.yaml" "${policy}"
@@ -64,4 +66,3 @@ ${gcloud} container clusters create \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
     --num-nodes=1 --region="${REGION}" --machine-type="e2-micro" "${PROD_CLUSTER}"
-
