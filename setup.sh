@@ -5,6 +5,10 @@ dir=$(dirname $0)
 . "${dir}"/env.sh
 
 # Start API enablements so we don't have to wait for them below.
+# For reasons I don't know, running artifactregistry enablement --async here and
+# blocking on it below just before repository creation often leads to an error
+# indicating that the API is not yet enabled. I am guessing there may be a
+# propogation issue across AR regions? Workaround: synchronously enable here.
 ${gcloud} services enable artifactregistry.googleapis.com
 ${gcloud} services enable binaryauthorization.googleapis.com --async # Binary Authorization
 ${gcloud} services enable cloudkms.googleapis.com --async            # KMS
@@ -24,7 +28,6 @@ ${gcloud} iam service-accounts create "${BUILDER}" \
 # Set up Artifact Registry: create a docker repository and authorize the
 # BUILDER_SA to push images to it.
 ${gcloud} services enable artifactregistry.googleapis.com # Ensure AR is enabled
-
 ${gcloud} artifacts repositories create "${REPO}" \
     --repository-format=docker --location="${LOCATION}"
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
