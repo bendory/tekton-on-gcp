@@ -22,14 +22,6 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
     --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com
 
 # Set up the attestor
-# https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#5
-# The note name "tekton-default-simplesigning" comes from Tekton Chains.
-# Allow ATTESTOR_SA to read notes.
-ATTESTOR_SA=service-${PROJECT_NUMBER}@gcp-sa-binaryauthorization.iam.gserviceaccount.com
-${gcloud} projects add-iam-policy-binding $PROJECT \
-    --member="serviceAccount:${ATTESTOR_SA}" \
-    --role=roles/containeranalysis.notes.occurrences.viewer
-
 # Create the attestor; note that the attestor must be set up before the binauthz
 # policy referencing it is applied.
 # https://cloud.google.com/binary-authorization/docs/creating-attestors-cli
@@ -37,6 +29,16 @@ NOTE_ID=projects/${PROJECT}/notes/tekton-default-simplesigning
 ${gcloud} container binauthz attestors create "${ATTESTOR_NAME}" \
     --attestation-authority-note="${NOTE_ID}" \
     --attestation-authority-note-project="${PROJECT}"
+
+# Ordering counts! Note that the ATTESTOR_SA is only created after the attestor
+# itself is created.
+# https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#5
+# The note name "tekton-default-simplesigning" comes from Tekton Chains.
+# Allow ATTESTOR_SA to read notes.
+ATTESTOR_SA=service-${PROJECT_NUMBER}@gcp-sa-binaryauthorization.iam.gserviceaccount.com
+${gcloud} projects add-iam-policy-binding $PROJECT \
+    --member="serviceAccount:${ATTESTOR_SA}" \
+    --role=roles/containeranalysis.notes.occurrences.viewer
 
 # Add the key to the attestor. The --public-key-id-override tells bunauthz to
 # accept attestations that assert the given override as their publicKeyId.
