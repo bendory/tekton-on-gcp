@@ -5,7 +5,7 @@ dir=$(dirname $0)
 . "${dir}"/env.sh
 
 # Start API enablements so we don't have to wait for them below.
-${gcloud} services enable artifactregistry.googleapis.com --async    # AR
+${gcloud} services enable artifactregistry.googleapis.com
 ${gcloud} services enable binaryauthorization.googleapis.com --async # Binary Authorization
 ${gcloud} services enable cloudkms.googleapis.com --async            # KMS
 ${gcloud} services enable compute.googleapis.com --async             # GCE
@@ -24,7 +24,7 @@ ${gcloud} iam service-accounts create "${BUILDER}" \
 # Set up Artifact Registry: create a docker repository and authorize the
 # BUILDER_SA to push images to it.
 ${gcloud} services enable artifactregistry.googleapis.com # Ensure AR is enabled
-sleep 5 # This pause reduces flakes, presumably the API enablement needs to propagate.
+
 ${gcloud} artifacts repositories create "${REPO}" \
     --repository-format=docker --location="${LOCATION}"
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
@@ -73,8 +73,9 @@ ${gcloud} services enable \
     containerfilesystem.googleapis.com
 ${gcloud} container clusters create "${TEKTON_CLUSTER}" \
     --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog" \
-    --num-nodes=1 --image-type="COS_CONTAINERD" --enable-image-streaming \
+    --num-nodes=2 --image-type="COS_CONTAINERD" --enable-image-streaming \
     --binauthz-evaluation-mode="PROJECT_SINGLETON_POLICY_ENFORCE" \
+	--enable-autoscaling --min-nodes=1 --max-nodes=5 \
     --workload-metadata="GKE_METADATA"
 ${gcloud} container clusters \
     get-credentials --region=${REGION} "${TEKTON_CLUSTER}" # Set up kubectl credentials
@@ -98,7 +99,7 @@ echo "Tekton Pipelines installation completed."
 
 # Install tasks
 ${tkn} hub install task git-clone
-sleep 5 # No idea why a pause reduces flakes.
+sleep 10 # No idea why a pause reduces flakes.
 ${tkn} hub install task kaniko || ${tkn} hub install task kaniko
 
 # Install Tekton Chains. Tekton Chains will gather build provenance for images
@@ -124,17 +125,20 @@ ${gcloud} iam service-accounts add-iam-policy-binding \
 ${k_tekton} annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
     iam.gke.io/gcp-service-account=${VERIFIER_SA}
 
-# Configure Tekton Chains to use simplesigning with a KMS key and store the OCI
-# in grafeas (Container Analysis); TaskRuns will be captured using in-toto
-# format, signed with a KMS key and stored in grafeas.
+# Configure Tekton Chains to use simplesigning of images; TaskRuns will be
+# captured using in-toto. Attestations for both will be signed with a KMS key
+# and stored in *BOTH* grafeas (Container Analysis) and in OCI bundles alongside
+# the image itself in Artifact Registry.
+# NOTE: by not setting `storage.oci.repository`, we store the OCI alongside the
+# image itself in the image registry.
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p='{"data":{
     "artifacts.oci.format":      "simplesigning",
     "artifacts.oci.signer":      "kms",
-    "artifacts.oci.storage":     "grafeas",
+    "artifacts.oci.storage":     "grafeas,oci",
     "artifacts.taskrun.format":  "in-toto",
     "artifacts.taskrun.signer":  "kms",
-    "artifacts.taskrun.storage": "grafeas" }}'
+    "artifacts.taskrun.storage": "grafeas,oci" }}'
 
 # Configure the KMS signing key, storage project in Container Analysis, and
 # builder identifier used by Tekton Chains.
@@ -143,6 +147,11 @@ ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     \"signers.kms.kmsref\":        \"${KMS_URI}\", \
     \"storage.grafeas.projectid\": \"${PROJECT}\", \
     \"builder.id\":                \"${CONTEXT}\" }}"
+
+# To store OCI attestations alongside the image in AR, VERIFIER_SA needs
+# write permission.
+${gcloud} projects add-iam-policy-binding "${PROJECT}" \
+    --member="serviceAccount:${VERIFIER_SA}" --role='roles/artifactregistry.writer'
 
 # Apply pipeline.yaml; see https://tekton.dev/docs/how-to-guides/kaniko-build-push/
 ${k_tekton} apply --filename "${dir}/pipeline.yaml"
