@@ -36,10 +36,19 @@ export VERIFIER=tekton-chains-controller
 export VERIFIER_SA="${VERIFIER}@${PROJECT}.iam.gserviceaccount.com"
 
 # KMS envvars
-export KEY=tekton-chains-key
+if [[ -z "${KEY_PROJECT}" ]]; then
+  # Use the same project for Tekton and key storage.
+  export KEY_PROJECT=${PROJECT}
+  export KEY=tekton-chains-key
+else
+  # Keys are stored in a separate project; we name the key after the project
+  # that uses it to enable ease of key identification and management in the keys
+  # project.
+  export KEY=${PROJECT}
+fi
 export KEYRING=tekton-chains
 export KEY_VERSION=1
-export KMS_URI="gcpkms://projects/${PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}/cryptoKeyVersions/${KEY_VERSION}"
+export KMS_URI="gcpkms://projects/${KEY_PROJECT}/locations/${LOCATION}/keyRings/${KEYRING}/cryptoKeys/${KEY}/cryptoKeyVersions/${KEY_VERSION}"
 
 # kubectl configuration
 export PROD_CLUSTER=prod
@@ -53,6 +62,7 @@ kubectl=$(which kubectl) || ( echo "kubectl not found" && exit 1 )
 _=$(which kubectl-tkn)   || ( echo "tkn not found" && exit 1 )
 
 # Aliases for commands
+key_gcloud="${gcloud} --project=${KEY_PROJECT}"
 gcloud="${gcloud} --project=${PROJECT}"
 tkn="${kubectl} tkn --context=${TEKTON_CONTEXT}"
 k_tekton="${kubectl} --context=${TEKTON_CONTEXT}"

@@ -47,7 +47,7 @@ ${gcloud} projects add-iam-policy-binding $PROJECT \
 # definition of KMS_URI in env.sh.
 ${gcloud} container binauthz attestors public-keys add \
     --attestor="${ATTESTOR_NAME}" \
-    --keyversion-project="${PROJECT}" \
+    --keyversion-project="${KEY_PROJECT}" \
     --keyversion-location="${LOCATION}" \
     --keyversion-keyring="${KEYRING}" \
     --keyversion-key="${KEY}" \

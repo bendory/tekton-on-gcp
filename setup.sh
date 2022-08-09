@@ -49,17 +49,17 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
 
 # Configure Key Management Service. Set up a private key that will be used by
 # VERIFIER_SA to sign attestations.
-${gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
-${gcloud} kms keyrings create "${KEYRING}" --location "${LOCATION}"
-${gcloud} kms keys create "${KEY}" \
+# NOTE: the below commands assume that key_setup.sh in this directory has
+# already executed successfully.
+${key_gcloud} kms keys create "${KEY}" \
     --keyring "${KEYRING}" \
     --location "${LOCATION}" \
     --purpose "asymmetric-signing" \
     --default-algorithm "rsa-sign-pkcs1-2048-sha256"
-${gcloud} kms keys add-iam-policy-binding "${KEY}" \
+${key_gcloud} kms keys add-iam-policy-binding "${KEY}" \
     --location="${LOCATION}" --keyring="${KEYRING}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.cryptoOperator"
-${gcloud} kms keys add-iam-policy-binding "${KEY}" \
+${key_gcloud} kms keys add-iam-policy-binding "${KEY}" \
     --location="${LOCATION}" --keyring="${KEYRING}" \
     --member "serviceAccount:${VERIFIER_SA}" --role "roles/cloudkms.viewer"
 
