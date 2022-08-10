@@ -103,7 +103,8 @@ done
 echo "Tekton Pipelines installation completed."
 
 # Install tasks
-${tkn} hub install task git-clone
+# Latest version 0.8 has a bug that causes failure in our pipelines. :-(
+${tkn} hub install task git-clone --version=0.7
 sleep 10 # No idea why a pause reduces flakes.
 ${tkn} hub install task kaniko || ${tkn} hub install task kaniko
 
