@@ -80,7 +80,7 @@ ${gcloud} container clusters create "${TEKTON_CLUSTER}" \
     --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog" \
     --num-nodes=2 --image-type="COS_CONTAINERD" --enable-image-streaming \
     --binauthz-evaluation-mode="PROJECT_SINGLETON_POLICY_ENFORCE" \
-	--enable-autoscaling --min-nodes=2 --max-nodes=5 \
+    --enable-autoscaling --min-nodes=2 --max-nodes=5 \
     --workload-metadata="GKE_METADATA"
 ${gcloud} container clusters \
     get-credentials --region=${REGION} "${TEKTON_CLUSTER}" # Set up kubectl credentials
