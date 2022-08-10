@@ -51,6 +51,8 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
 # VERIFIER_SA to sign attestations.
 # NOTE: the below commands assume that key_setup.sh in this directory has
 # already executed successfully.
+${key_gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
+${key_gcloud} kms keyrings create "${KEYRING}" --location "${LOCATION}"
 ${key_gcloud} kms keys create "${KEY}" \
     --keyring "${KEYRING}" \
     --location "${LOCATION}" \

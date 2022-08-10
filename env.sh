@@ -36,6 +36,12 @@ export VERIFIER=tekton-chains-controller
 export VERIFIER_SA="${VERIFIER}@${PROJECT}.iam.gserviceaccount.com"
 
 # KMS envvars
+# It is a best practice to use a separate project for keys to better enforce
+# separation of duties:
+# https://cloud.google.com/kms/docs/separation-of-duties
+#
+# To use a separate project, set KEY_PROJECT before running ./setup.sh.
+# Otherwise, we just put the key in the same PROJECT as everything else.
 if [[ -z "${KEY_PROJECT}" ]]; then
   # Use the same project for Tekton and key storage.
   export KEY_PROJECT=${PROJECT}
