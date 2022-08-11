@@ -55,7 +55,9 @@ ${key_gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
 if ${key_gcloud} kms keyrings describe "${KEYRING}" --location "${LOCATION}"; then
   echo "KEYRING ${KEYRING} found."
 else
+  echo "KEYRING ${KEYRING} NOT found. That's OK, I'll create it now."
   ${key_gcloud} kms keyrings create "${KEYRING}" --location "${LOCATION}"
+  echo "KEYRING ${KEYRING} created successfully."
 fi
 ${key_gcloud} kms keys create "${KEY}" \
     --keyring "${KEYRING}" \
