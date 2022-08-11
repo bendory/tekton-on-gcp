@@ -13,7 +13,7 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 1Gi
+            storage: 2Mi
   params:
   - name: repo-url
     value: https://github.com/bendory/mini-true.git
