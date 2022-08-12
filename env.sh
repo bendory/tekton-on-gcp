@@ -16,7 +16,7 @@ fi;
 
 # Location settings
 export LOCATION=us
-export REGION=us-central1
+export ZONE=us-central1-c
 
 # Chains configuration
 export ATTESTOR_NAME=tekton-chains-attestor
@@ -55,9 +55,9 @@ export KMS_URI="gcpkms://projects/${KEY_PROJECT}/locations/${LOCATION}/keyRings/
 
 # kubectl configuration
 export PROD_CLUSTER=prod
-export PROD_CONTEXT=gke_${PROJECT}_${REGION}_${PROD_CLUSTER} # context for kubectl
+export PROD_CONTEXT=gke_${PROJECT}_${ZONE}_${PROD_CLUSTER} # context for kubectl
 export TEKTON_CLUSTER=tekton
-export TEKTON_CONTEXT=gke_${PROJECT}_${REGION}_${TEKTON_CLUSTER} # context for kubectl
+export TEKTON_CONTEXT=gke_${PROJECT}_${ZONE}_${TEKTON_CLUSTER} # context for kubectl
 
 # Pre-requisites: installation of Cloud SDK, kubectl, tkn
 gcloud=$(which gcloud)   || ( echo "gcloud not found" && exit 1 )

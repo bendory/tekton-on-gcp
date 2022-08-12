@@ -3,10 +3,10 @@ defaultAdmissionRule:
   evaluationMode: ALWAYS_DENY
   enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
 clusterAdmissionRules:
-  us-central1.tekton:
+  us-central1-c.tekton:
     evaluationMode: ALWAYS_ALLOW
     enforcementMode: DRYRUN_AUDIT_LOG_ONLY
-  us-central1.prod:
+  us-central1-c.prod:
     evaluationMode: REQUIRE_ATTESTATION
     enforcementMode: ENFORCED_BLOCK_AND_AUDIT_LOG
     requireAttestationsBy:

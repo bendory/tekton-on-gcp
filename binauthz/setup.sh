@@ -67,4 +67,4 @@ rm -rf "${policydir}"
 ${gcloud} container clusters create \
     --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE \
     --image-type="COS_CONTAINERD" --enable-image-streaming \
-    --num-nodes=1 --region="${REGION}" --machine-type="e2-micro" "${PROD_CLUSTER}"
+    --num-nodes=1 --zone="${ZONE}" --machine-type="e2-micro" "${PROD_CLUSTER}"

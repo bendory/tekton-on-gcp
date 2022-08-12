@@ -7,8 +7,8 @@ dir=$(dirname $0)
 # Start API enablements so we don't have to wait for them below.
 # For reasons I don't know, running artifactregistry enablement --async here and
 # blocking on it below just before repository creation often leads to an error
-# indicating that the API is not yet enabled. I am guessing there may be a
-# propogation issue across AR regions? Workaround: synchronously enable here.
+# indicating that the API is not yet enabled. I am guessing there is a
+# propogation issue. Workaround: synchronously enable here.
 ${gcloud} services enable artifactregistry.googleapis.com
 ${gcloud} services enable binaryauthorization.googleapis.com --async # Binary Authorization
 ${gcloud} services enable cloudkms.googleapis.com --async            # KMS
@@ -27,7 +27,6 @@ ${gcloud} iam service-accounts create "${BUILDER}" \
 
 # Set up Artifact Registry: create a docker repository and authorize the
 # BUILDER_SA to push images to it.
-${gcloud} services enable artifactregistry.googleapis.com # Ensure AR is enabled
 ${gcloud} artifacts repositories create "${REPO}" \
     --repository-format=docker --location="${LOCATION}"
 ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
@@ -83,13 +82,13 @@ ${gcloud} services enable \
     container.googleapis.com \
     containerfilesystem.googleapis.com
 ${gcloud} container clusters create "${TEKTON_CLUSTER}" \
-    --region="${REGION}" --workload-pool="${PROJECT}.svc.id.goog" \
+    --zone="${ZONE}" --workload-pool="${PROJECT}.svc.id.goog" \
     --num-nodes=1 --image-type="COS_CONTAINERD" --enable-image-streaming \
     --binauthz-evaluation-mode="PROJECT_SINGLETON_POLICY_ENFORCE" \
     --enable-autoscaling --min-nodes=1 --max-nodes=5 \
     --workload-metadata="GKE_METADATA"
 ${gcloud} container clusters \
-    get-credentials --region=${REGION} "${TEKTON_CLUSTER}" # Set up kubectl credentials
+    get-credentials --zone=${ZONE} "${TEKTON_CLUSTER}" # Set up kubectl credentials
 ${gcloud} iam service-accounts add-iam-policy-binding \
     "${BUILDER_SA}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT}.svc.id.goog[default/default]"
