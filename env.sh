@@ -26,9 +26,6 @@ export CHAINS_NS=tekton-chains
 export IMAGE=allow
 export REPO=my-repo
 
-# Node pool used in Tekton cluster
-export NODE_POOL=default-pool
-
 # Service Accounts
 export BUILDER=builder
 export BUILDER_SA="${BUILDER}@${PROJECT}.iam.gserviceaccount.com"
