@@ -58,8 +58,7 @@ ${gcloud} container binauthz attestors public-keys add \
 # https://codelabs.developers.google.com/codelabs/cloud-binauthz-intro/index.html#3
 policydir=$(mktemp -d)
 policy="${policydir}/policy.yaml"
-cp "${dir}/policy.yaml" "${policy}"
-echo "      projects/${PROJECT}/attestors/${ATTESTOR_NAME}" >> "${policy}"
+envsubst < "${dir}/policy.yaml" > "${policy}"
 ${gcloud} container binauthz policy import "${policy}"
 rm -rf "${policydir}"
 

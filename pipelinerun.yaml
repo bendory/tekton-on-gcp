@@ -18,3 +18,4 @@ spec:
   - name: repo-url
     value: https://github.com/bendory/mini-true.git
   - name: image-reference
+    value: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/true

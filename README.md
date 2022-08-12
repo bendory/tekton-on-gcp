@@ -4,11 +4,14 @@ build-and-push of container to AR.
 
 1. Set up a GCP project, including billing setup.
 2. Make sure you have Cloud SDK, `kubectl`, `ko`, and `tkn` (Tekton CLI) installed.
-3. Clone this repo.
-4. `export PROJECT=<the-project-you-set-up>`
-5. `./setup.sh`
-6. When `setup.sh` completes, `run_pipeline.sh` will build and push a container.
-7. Provenance will be captured in Container Analysis, and the `./verify_*`
+3. You also need the `envsubst` tool (which is typically part of the `gettext` package).
+4. Clone this repo.
+5. `export PROJECT=<the-project-you-set-up>`
+   Optional: `export KEY_PROJECT=<project-for-kms>` if you want to store your
+   keys separately. See: https://cloud.google.com/kms/docs/separation-of-duties
+6. `./setup.sh`
+7. When `setup.sh` completes, `run_pipeline.sh` will build and push a container.
+8. Provenance will be captured in Container Analysis, and the `./verify_*`
    scripts can be used to verify `kms` signatures.
 
 NOTE: When you run `setup.sh`, a new `kubectl` configuration will be created and
