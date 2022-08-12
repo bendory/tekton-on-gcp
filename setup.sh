@@ -51,6 +51,7 @@ ${gcloud} projects add-iam-policy-binding "${PROJECT}" \
 # NOTE: the below commands assume that key_setup.sh in this directory has
 # already executed successfully.
 ${key_gcloud} services enable cloudkms.googleapis.com # Ensure KMS is available.
+echo "Checking for existence of KEYRING ${KEYRING}..."
 if ${key_gcloud} kms keyrings describe "${KEYRING}" --location "${LOCATION}"; then
   echo "KEYRING ${KEYRING} found."
 else
