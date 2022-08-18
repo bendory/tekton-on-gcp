@@ -10,3 +10,4 @@ spec:
     emptyDir: {}
   params:
   - name: IMAGE
+    value: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/${IMAGE}

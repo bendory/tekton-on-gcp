@@ -9,8 +9,7 @@ dir=$(dirname $0)
 ${k_tekton} apply --filename "${dir}/task.yaml"
 
 taskrun=$(mktemp)
-cp "${dir}/taskrun.yaml" "${taskrun}"
-echo "    value: ${LOCATION}-docker.pkg.dev/${PROJECT}/${REPO}/${IMAGE}" >> "${taskrun}"
+envsubst < "${dir}/taskrun.yaml" > "${taskrun}"
 ${k_tekton} create --filename "${taskrun}"
 rm -rf "${taskrun}"
 
