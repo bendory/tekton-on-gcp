@@ -62,11 +62,11 @@ export TEKTON_CONTEXT=gke_${PROJECT}_${ZONE}_${TEKTON_CLUSTER} # context for kub
 # Pre-requisites: installation of Cloud SDK, kubectl, tkn
 gcloud=$(which gcloud)   || ( echo "gcloud not found" && exit 1 )
 kubectl=$(which kubectl) || ( echo "kubectl not found" && exit 1 )
-_=$(which kubectl-tkn)   || ( echo "tkn not found" && exit 1 )
+tkn=$(which tkn)         || ( echo "tkn not found" && exit 1 )
 
 # Aliases for commands
 key_gcloud="${gcloud} --project=${KEY_PROJECT}"
 gcloud="${gcloud} --project=${PROJECT}"
-tkn="tkn --context=${TEKTON_CONTEXT}"
+tkn="${tkn} --context=${TEKTON_CONTEXT}"
 k_tekton="${kubectl} --context=${TEKTON_CONTEXT}"
 k_prod="${kubectl} --context=${PROD_CONTEXT}"
