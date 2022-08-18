@@ -67,6 +67,6 @@ _=$(which kubectl-tkn)   || ( echo "tkn not found" && exit 1 )
 # Aliases for commands
 key_gcloud="${gcloud} --project=${KEY_PROJECT}"
 gcloud="${gcloud} --project=${PROJECT}"
-tkn="${kubectl} tkn --context=${TEKTON_CONTEXT}"
+tkn="tkn --context=${TEKTON_CONTEXT}"
 k_tekton="${kubectl} --context=${TEKTON_CONTEXT}"
 k_prod="${kubectl} --context=${PROD_CONTEXT}"
