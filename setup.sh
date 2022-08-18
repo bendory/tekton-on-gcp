@@ -88,8 +88,6 @@ ${gcloud} container clusters create "${TEKTON_CLUSTER}" \
     --binauthz-evaluation-mode="PROJECT_SINGLETON_POLICY_ENFORCE" \
     --enable-autoscaling --min-nodes=1 --max-nodes=5 \
     --workload-metadata="GKE_METADATA"
-${gcloud} container clusters \
-    get-credentials --zone=${ZONE} "${TEKTON_CLUSTER}" # Set up kubectl credentials
 ${gcloud} iam service-accounts add-iam-policy-binding \
     "${BUILDER_SA}" --role roles/iam.workloadIdentityUser \
     --member "serviceAccount:${PROJECT}.svc.id.goog[default/default]"
