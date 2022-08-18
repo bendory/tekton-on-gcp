@@ -5,6 +5,10 @@ metadata:
 spec:
   pipelineRef:
     name: clone-build-push
+  podTemplate:
+    # See https://github.com/tektoncd/catalog/issues/1044
+    securityContext:
+      fsGroup: 65532
   workspaces:
   - name: shared-data
     volumeClaimTemplate:
