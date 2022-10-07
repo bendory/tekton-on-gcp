@@ -36,9 +36,10 @@ Run `verify_attestation.sh` to verify the signed attestation with `kms`.
 NOTE:
 - To verify signatures, you must first install `cosign` and `jq`.
 - To authenticate with `cosign`, you need Application Default Credentials, which
-  you can put into place like this: `gcloud auth application-default login`.
-  This is different from `gcloud auth login`.
-  The error if you need to login with ADC looks like this:
+  you can put into place via `gcloud auth application-default login`.
+  -  See: https://cloud.google.com/sdk/gcloud/reference/auth/application-default
+- This (unfortunately obscure) error indicates that you need to authenticate
+  with ADC:
 
   ```
   Error: verifying blob: <details>: loading public key: loading URL: unrecognized scheme: gcpkms://
