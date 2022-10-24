@@ -59,6 +59,12 @@ export PROD_CONTEXT=gke_${PROJECT}_${ZONE}_${PROD_CLUSTER} # context for kubectl
 export TEKTON_CLUSTER=tekton
 export TEKTON_CONTEXT=gke_${PROJECT}_${ZONE}_${TEKTON_CLUSTER} # context for kubectl
 
+# CRD versions to use; default is latest
+# Pin to a specific version by specifying its directory, for example:
+# CHAINS_VERSION=previous/v0.12.0
+export PIPELINE_VERSION=latest
+export CHAINS_VERSION=latest
+
 # Pre-requisites: installation of Cloud SDK, kubectl, tkn
 gcloud=$(which gcloud)   || ( echo "gcloud not found" && exit 1 )
 kubectl=$(which kubectl) || ( echo "kubectl not found" && exit 1 )

@@ -96,7 +96,7 @@ ${k_tekton} annotate serviceaccount \
     --namespace default default iam.gke.io/gcp-service-account="${BUILDER_SA}"
 
 # Install Tekton Pipelines CRDs.
-${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/pipeline/${PIPELINE_VERSION}/release.yaml
 
 # Wait for pipelines to be ready.
 unset status
@@ -113,10 +113,7 @@ ${tkn} hub install task kaniko || ${tkn} hub install task kaniko
 
 # Install Tekton Chains. Tekton Chains will gather build provenance for images
 # and attest to their provenance from this Tekton installation.
-# We need a chains release >=v0.11.0 to pick up a bugfix in the grafeas
-# implementation; latest is currently at v0.9.0.
-#${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
-${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/previous/v0.11.0/release.yaml
+${k_tekton} apply --filename https://storage.googleapis.com/tekton-releases/chains/${CHAINS_VERSION}/release.yaml
 
 unset status
 while [[ "${status}" -ne "Running" ]]; do
