@@ -15,7 +15,7 @@ ${gcloud} services enable cloudkms.googleapis.com --async            # KMS
 ${gcloud} services enable compute.googleapis.com --async             # GCE
 ${gcloud} services enable container.googleapis.com --async           # GKE
 ${gcloud} services enable containeranalysis.googleapis.com --async   # Container Analysis for provenance storage
-${gcloud} services enable containerscanning.googleapis.com --async   # Vulnterability Scanning
+${gcloud} services enable containerscanning.googleapis.com --async   # Vulnerability Scanning
 ${gcloud} services enable containerfilesystem.googleapis.com --async # Streaming Images
 ${gcloud} services enable iam.googleapis.com --async                 # IAM
 
