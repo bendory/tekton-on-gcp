@@ -8,8 +8,8 @@ set -e
 dir=$(dirname $0)
 . "${dir}"/env.sh
 
-IMAGE_URL=$(${tkn} tr describe --last -o jsonpath="{.status.taskResults[1].value}")
-IMAGE_DIGEST=$(${tkn} tr describe --last -o jsonpath="{.status.taskResults[0].value}")
+IMAGE_URL=$(${tkn} tr describe --last -o jsonpath="{.status.results[1].value}")
+IMAGE_DIGEST=$(${tkn} tr describe --last -o jsonpath="{.status.results[0].value}")
 
 alias gcurl='curl -s -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $(gcloud auth print-access-token)"'
 query_url="https://containeranalysis.googleapis.com/v1/projects/$PROJECT/occurrences?filter=resourceUrl=\"${IMAGE_URL}@${IMAGE_DIGEST}\"%20AND%20kind=\"BUILD\""
