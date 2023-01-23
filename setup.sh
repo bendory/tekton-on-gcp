@@ -140,20 +140,22 @@ ${k_tekton} annotate serviceaccount "${VERIFIER}" --namespace "${CHAINS_NS}" \
 # image itself in the image registry.
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p='{"data":{
-    "artifacts.oci.format":      "simplesigning",
-    "artifacts.oci.signer":      "kms",
-    "artifacts.oci.storage":     "grafeas,oci",
-    "artifacts.taskrun.format":  "in-toto",
-    "artifacts.taskrun.signer":  "kms",
-    "artifacts.taskrun.storage": "grafeas,oci" }}'
+    "artifacts.oci.format":          "simplesigning",
+    "artifacts.oci.signer":          "kms",
+    "artifacts.oci.storage":         "grafeas,oci",
+    "artifacts.pipelinerun.format":  "in-toto",
+    "artifacts.pipelinerun.signer":  "kms",
+    "artifacts.pipelinerun.storage": "grafeas,oci",
+    "artifacts.taskrun.format":      "in-toto",
+    "artifacts.taskrun.signer":      "kms",
+    "artifacts.taskrun.storage":     "grafeas,oci" }}'
 
 # Configure the KMS signing key, storage project in Container Analysis, and
 # builder identifier used by Tekton Chains.
 ${k_tekton} patch configmap chains-config -n "${CHAINS_NS}" \
     -p="{\"data\": {\
     \"signers.kms.kmsref\":        \"${KMS_URI}\", \
-    \"storage.grafeas.projectid\": \"${PROJECT}\", \
-    \"builder.id\":                \"${CONTEXT}\" }}"
+    \"storage.grafeas.projectid\": \"${PROJECT}\" }}"
 
 # To store OCI attestations alongside the image in AR, VERIFIER_SA needs
 # write permission.
