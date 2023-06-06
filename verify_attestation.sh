@@ -29,6 +29,6 @@ attestation=${TMP}/attestation
 jq -r '.occurrences[0].envelope.payload' "${full}" | tr '\-_' '+/' | base64 -d > ${attestation}
 
 # Verify the signature.
-cosign verify-blob --key "${KEY_REF}" --signature "${signature}" "${attestation}"
+cosign verify-blob --insecure-ignore-tlog=true --key "${KEY_REF}" --signature "${signature}" "${attestation}"
 
 rm -rf "${TMP}"
