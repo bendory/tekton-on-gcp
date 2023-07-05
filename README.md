@@ -44,3 +44,7 @@ NOTE:
   ```
   Error: verifying blob: <details>: loading public key: loading URL: unrecognized scheme: gcpkms://
   ```
+
+# Next Steps
+
+For more advanced GKE configuration information, see https://github.com/bendory/tekton-gke.
